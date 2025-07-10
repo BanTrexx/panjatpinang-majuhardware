@@ -3,7 +3,7 @@ const router = express.Router();
 const { playerID, home, games } = require('../controllers/clientController')
 
 router.get('/', home)
-router.get('/game:name', games)
+router.get('/game', games)
 router.post('/game', playerID)
 
 module.exports = router;

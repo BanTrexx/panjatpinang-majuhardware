@@ -3,7 +3,7 @@ export const home = (req, res) => {
 };
 
 export const games = (req, res) => {
-  const name = req.body.name;
+  const name = req.query.userId || req.body.name;
   res.render("clients/game", { title: "Quiz", nama: name });
 };
 

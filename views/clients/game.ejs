@@ -1,8 +1,7 @@
 <%- include('../partials/clients/header') %>
 
 <style>
-  body,
-  html {
+  body, html {
     margin: 0;
     padding: 0;
     height: 100%;
@@ -11,46 +10,162 @@
     font-family: Arial, sans-serif;
     overflow: hidden;
   }
-
   .tap-area {
-    width: 100%;
+    width: 100vw;
     height: 100vh;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: flex-start;
     align-items: center;
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
     text-align: center;
-    padding: 20px;
+    padding: 0;
     box-sizing: border-box;
+    position: relative;
   }
-
-  .tap-area:active {
-    background-color: #333;
+  .info {
+    width: 100vw;
+    max-width: 600px;
+    margin: 0 auto;
+    padding-top: 30px;
+    z-index: 2;
   }
-
-  h1 {
-    font-size: 2rem;
+  #status {
+    font-size: 2em;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  #countdown {
+    font-size: 3em;
+    color: #ffeb3b;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  #winner {
+    font-size: 2em;
+    color: #4caf50;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  #queue {
+    font-size: 1.1em;
+    color: #bbb;
+    margin-bottom: 10px;
+    display: none;
+  }
+  .tap-hint {
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    width: 100vw;
+    text-align: center;
+    font-size: 2em;
+    color: #ffeb3b;
+    opacity: 0.7;
+    pointer-events: none;
   }
 </style>
 
-<main>
-  <div class="tap-area" id="tapArea">
-    <h1>Tap Anywhere to Play!</h1>
+<div class="tap-area" id="tapArea">
+  <div class="info">
+    <div id="status"></div>
+    <div id="countdown"></div>
+    <div id="winner"></div>
+    <div id="queue"></div>
   </div>
-</main>
+  <div class="tap-hint">Tap di mana saja untuk memanjat!</div>
+</div>
 
+<script src="/socket.io/socket.io.js"></script>
 <script>
-  const socket = io("ws://192.168.88.158:3000", {
-    query: { userId: "<%= nama %>", role: "player" },
+  function getUserId() {
+    const params = new URLSearchParams(window.location.search);
+    let id = params.get('userId');
+    if (!id) {
+      id = 'player_' + Math.random().toString(36).substr(2, 6);
+      window.location.search = '?userId=' + id;
+    }
+    return id;
+  }
+  const userId = getUserId();
+  const socket = io({
+    query: { role: 'player', userId }
   });
 
-  const tapArea = document.getElementById("tapArea");
-  tapArea.addEventListener("click", () => {
-    console.log("Tapped!");
-    socket.emit("playerAction", { action: "tap" });
+  let gameStatus = 'waiting';
+  let currentPlayers = [];
+  let winner = null;
+  let queueLength = 0;
+
+  function renderStatus(status) {
+    let text = '';
+    if (status === 'waiting') text = 'Menunggu giliran bermain...';
+    if (status === 'countdown') text = 'Countdown dimulai!';
+    if (status === 'playing') text = 'Ayo tap secepatnya!';
+    if (status === 'finished') text = 'Permainan selesai!';
+    document.getElementById('status').innerText = text;
+  }
+
+  function renderWinner(winnerId) {
+    if (!winnerId) {
+      document.getElementById('winner').innerText = '';
+      return;
+    }
+    if (winnerId === userId) {
+      document.getElementById('winner').innerText = 'Selamat! Anda MENANG!';
+    } else if (currentPlayers.includes(userId)) {
+      document.getElementById('winner').innerText = 'Anda KALAH!';
+    } else {
+      document.getElementById('winner').innerText = '';
+    }
+  }
+
+  function renderQueue() {
+    const queueDiv = document.getElementById('queue');
+    // Tampilkan antrian hanya jika user sedang menunggu giliran dan gameStatus 'playing'
+    if (gameStatus === 'playing' && !currentPlayers.includes(userId) && queueLength > 0) {
+      queueDiv.style.display = 'block';
+      queueDiv.innerText = `Menunggu giliran... Antrian pemain: ${queueLength}`;
+    } else {
+      queueDiv.style.display = 'none';
+      queueDiv.innerText = '';
+    }
+  }
+
+  // Tap area logic
+  const tapArea = document.getElementById('tapArea');
+  tapArea.addEventListener('click', () => {
+    if (gameStatus === 'playing' && currentPlayers.includes(userId)) {
+      socket.emit('playerAction');
+    }
+  });
+
+  socket.on('gameStatusUpdate', ({ gameStatus: status, currentPlayers: players, winner: win, queueLength: ql }) => {
+    gameStatus = status;
+    currentPlayers = players;
+    winner = win;
+    queueLength = ql;
+    renderStatus(status);
+    renderWinner(win);
+    renderQueue();
+    if (status !== 'countdown') {
+      document.getElementById('countdown').innerText = '';
+    }
+    if (status !== 'finished') {
+      document.getElementById('winner').innerText = '';
+    }
+  });
+
+  socket.on('countdown', (count) => {
+    document.getElementById('countdown').innerText = count > 0 ? `Mulai dalam: ${count}` : '';
+  });
+
+  socket.on('gameFinished', ({ winner: win }) => {
+    renderWinner(win);
+    renderQueue();
   });
 </script>
 
