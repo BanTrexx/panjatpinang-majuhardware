@@ -26,80 +26,14 @@ app.set("view engine", "ejs")
 app.use(ClientRoutes)
 app.use(DisplayRoutes)
 
-const playersProgress = {};
 let queue = [];
 let currentPlayers = [];
-let gameStatus = 'waiting'; // 'waiting', 'countdown', 'playing', 'finished'
-let winner = null;
-let countdownTimer = null;
 
-function emitGameStatus() {
-  io.to('display').emit('gameStatusUpdate', {
-    gameStatus,
+function emitQueueStatus() {
+  io.to('display').emit('queueStatus', {
+    queue,
     currentPlayers,
-    playersProgress,
-    winner,
-    queueLength: queue.length,
   });
-  currentPlayers.forEach((name) => {
-    io.to(name).emit('gameStatusUpdate', {
-      gameStatus,
-      currentPlayers,
-      playersProgress,
-      winner,
-      queueLength: queue.length,
-    });
-  });
-}
-
-function startCountdown() {
-  gameStatus = 'countdown';
-  emitGameStatus();
-  let count = 3;
-  io.to('display').emit('countdown', count);
-  currentPlayers.forEach((name) => io.to(name).emit('countdown', count));
-  countdownTimer = setInterval(() => {
-    count--;
-    io.to('display').emit('countdown', count);
-    currentPlayers.forEach((name) => io.to(name).emit('countdown', count));
-    if (count === 0) {
-      clearInterval(countdownTimer);
-      startGame();
-    }
-  }, 1000);
-}
-
-function startGame() {
-  gameStatus = 'playing';
-  playersProgress[currentPlayers[0]] = 0;
-  playersProgress[currentPlayers[1]] = 0;
-  winner = null;
-  emitGameStatus();
-}
-
-function finishGame(winnerName) {
-  gameStatus = 'finished';
-  winner = winnerName;
-  emitGameStatus();
-  io.to('display').emit('gameFinished', { winner });
-  currentPlayers.forEach((name) => io.to(name).emit('gameFinished', { winner }));
-  setTimeout(() => {
-    // Reset for next game
-    playersProgress[currentPlayers[0]] = 0;
-    playersProgress[currentPlayers[1]] = 0;
-    currentPlayers = [];
-    winner = null;
-    gameStatus = 'waiting';
-    // Ambil dua pemain berikutnya dari queue
-    while (currentPlayers.length < 2 && queue.length > 0) {
-      currentPlayers.push(queue.shift());
-    }
-    if (currentPlayers.length === 2) {
-      startCountdown();
-    } else {
-      emitGameStatus();
-    }
-  }, 3000);
 }
 
 io.on('connection', (socket) => {
@@ -109,7 +43,42 @@ io.on('connection', (socket) => {
 
   if (role === 'display') {
     socket.join('display');
-    emitGameStatus();
+    // Kirim status antrian dan pemain aktif
+    emitQueueStatus();
+    // Listen for game state updates from display and relay to players
+    socket.on('gameStatusUpdate', (data) => {
+      // Relay to all players in currentPlayers
+      currentPlayers.forEach((playerName) => {
+        io.to(playerName).emit('gameStatusUpdate', data);
+      });
+      // Also relay to display (for sync)
+      io.to('display').emit('gameStatusUpdate', data);
+    });
+    // Listen for countdown event from display and relay to players
+    socket.on('countdown', (count) => {
+      currentPlayers.forEach((playerName) => {
+        io.to(playerName).emit('countdown', count);
+      });
+      io.to('display').emit('countdown', count);
+    });
+    // Listen for gameFinished event from display and relay to players
+    socket.on('gameFinished', (data) => {
+      currentPlayers.forEach((playerName) => {
+        io.to(playerName).emit('gameFinished', data);
+      });
+      io.to('display').emit('gameFinished', data);
+    });
+    // Listen for request to reset players (for next game)
+    socket.on('resetPlayers', () => {
+      currentPlayers = [];
+      // Ambil dua pemain berikutnya dari queue
+      while (currentPlayers.length < 2 && queue.length > 0) {
+        currentPlayers.push(queue.shift());
+      }
+      emitQueueStatus();
+      // Notify display of new players
+      io.to('display').emit('newPlayers', { currentPlayers });
+    });
     return;
   }
 
@@ -123,20 +92,15 @@ io.on('connection', (socket) => {
     while (currentPlayers.length < 2 && queue.length > 0) {
       currentPlayers.push(queue.shift());
     }
-    emitGameStatus();
-    // Jika sudah 2 pemain, mulai countdown jika status waiting
-    if (currentPlayers.length === 2 && gameStatus === 'waiting') {
-      startCountdown();
-    }
+    emitQueueStatus();
+    // Notify display of new players
+    io.to('display').emit('newPlayers', { currentPlayers });
   }
 
+  // Relay player action to display
   socket.on('playerAction', () => {
-    if (role === 'player' && gameStatus === 'playing' && currentPlayers.includes(name)) {
-      playersProgress[name] = Math.min(1, (playersProgress[name] || 0) + 0.05);
-      emitGameStatus();
-      if (playersProgress[name] >= 1 && !winner) {
-        finishGame(name);
-      }
+    if (role === 'player' && currentPlayers.includes(name)) {
+      io.to('display').emit('playerAction', { name });
     }
   });
 
@@ -148,16 +112,14 @@ io.on('connection', (socket) => {
       // Jika sedang main, hapus dari currentPlayers
       if (currentPlayers.includes(name)) {
         currentPlayers = currentPlayers.filter((n) => n !== name);
-        delete playersProgress[name];
-        // Jika game sedang berlangsung, langsung akhiri dan pemain lain menang
-        if (gameStatus === 'playing' && currentPlayers.length === 1) {
-          finishGame(currentPlayers[0]);
-        } else {
-          emitGameStatus();
+        // Notify display player left
+        io.to('display').emit('playerLeft', { name });
+        // Reset players if less than 2
+        if (currentPlayers.length < 2) {
+          io.to('display').emit('notEnoughPlayers');
         }
-      } else {
-        emitGameStatus();
       }
+      emitQueueStatus();
     }
   });
 });

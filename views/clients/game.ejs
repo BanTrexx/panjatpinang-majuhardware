@@ -135,6 +135,7 @@
     }
   });
 
+  // --- Only listen for updates from app.js (relayed from display) ---
   socket.on('gameStatusUpdate', ({ gameStatus: status, currentPlayers: players, winner: win, queueLength: ql }) => {
     gameStatus = status;
     currentPlayers = players;
@@ -158,7 +159,6 @@
   socket.on('gameFinished', ({ winner: win }) => {
     renderWinner(win);
     renderQueue();
-    // Redirect ke form setelah 3 detik
     setTimeout(() => {
       window.location.href = '/';
     }, 5000);

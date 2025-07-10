@@ -147,9 +147,115 @@
     query: { role: 'display', userId: 'display' }
   });
 
+  // Game state managed by display
   let currentPlayers = [];
   let playersProgress = {};
+  let gameStatus = 'waiting';
+  let winner = null;
+  let queue = [];
+  let countdownTimer = null;
 
+  // --- Game Logic ---
+  function emitGameStatus() {
+    socket.emit('gameStatusUpdate', {
+      gameStatus,
+      currentPlayers,
+      playersProgress,
+      winner,
+      queueLength: queue.length,
+    });
+  }
+
+  function startCountdown() {
+    gameStatus = 'countdown';
+    emitGameStatus();
+    let count = 3;
+    socket.emit('countdown', count);
+    countdownTimer = setInterval(() => {
+      count--;
+      socket.emit('countdown', count);
+      if (count === 0) {
+        clearInterval(countdownTimer);
+        startGame();
+      }
+    }, 1000);
+  }
+
+  function startGame() {
+    gameStatus = 'playing';
+    playersProgress[currentPlayers[0]] = 0;
+    playersProgress[currentPlayers[1]] = 0;
+    winner = null;
+    emitGameStatus();
+  }
+
+  function finishGame(winnerName) {
+    gameStatus = 'finished';
+    winner = winnerName;
+    emitGameStatus();
+    socket.emit('gameFinished', { winner });
+    setTimeout(() => {
+      // Reset for next game
+      playersProgress[currentPlayers[0]] = 0;
+      playersProgress[currentPlayers[1]] = 0;
+      winner = null;
+      gameStatus = 'waiting';
+      // Minta app.js reset pemain dan ambil 2 pemain berikutnya
+      socket.emit('resetPlayers');
+    }, 3000);
+  }
+
+  // --- Listen for events from app.js ---
+  socket.on('queueStatus', ({ queue: q, currentPlayers: cp }) => {
+    queue = q;
+    currentPlayers = cp;
+    if (currentPlayers.length === 2 && gameStatus === 'waiting') {
+      startCountdown();
+    } else {
+      emitGameStatus();
+    }
+  });
+
+  socket.on('newPlayers', ({ currentPlayers: cp }) => {
+    currentPlayers = cp;
+    if (currentPlayers.length === 2 && gameStatus === 'waiting') {
+      startCountdown();
+    } else {
+      emitGameStatus();
+    }
+  });
+
+  socket.on('playerAction', ({ name }) => {
+    if (gameStatus === 'playing' && currentPlayers.includes(name)) {
+      playersProgress[name] = Math.min(1, (playersProgress[name] || 0) + 0.05);
+      emitGameStatus();
+      if (playersProgress[name] >= 1 && !winner) {
+        finishGame(name);
+      }
+    }
+  });
+
+  socket.on('playerLeft', ({ name }) => {
+    // Remove player from currentPlayers
+    currentPlayers = currentPlayers.filter((n) => n !== name);
+    delete playersProgress[name];
+    if (gameStatus === 'playing' && currentPlayers.length === 1) {
+      finishGame(currentPlayers[0]);
+    } else {
+      emitGameStatus();
+    }
+  });
+
+  socket.on('notEnoughPlayers', () => {
+    // End game if not enough players
+    if (gameStatus === 'playing' && currentPlayers.length < 2) {
+      gameStatus = 'waiting';
+      winner = null;
+      emitGameStatus();
+    }
+  });
+
+  // --- UI rendering (unchanged) ---
   function renderStatus(status, queueLength) {
     let text = '';
     if (status === 'waiting') text = 'Menunggu pemain...';
