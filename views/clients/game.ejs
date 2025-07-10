@@ -81,18 +81,10 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  function getUserId() {
-    const params = new URLSearchParams(window.location.search);
-    let id = params.get('userId');
-    if (!id) {
-      id = 'player_' + Math.random().toString(36).substr(2, 6);
-      window.location.search = '?userId=' + id;
-    }
-    return id;
-  }
-  const userId = getUserId();
+  // Ambil nama player dari EJS
+  const playerName = "<%= nama %>";
   const socket = io({
-    query: { role: 'player', userId }
+    query: { role: 'player', name: playerName }
   });
 
   let gameStatus = 'waiting';
@@ -109,14 +101,14 @@
     document.getElementById('status').innerText = text;
   }
 
-  function renderWinner(winnerId) {
-    if (!winnerId) {
+  function renderWinner(winnerName) {
+    if (!winnerName) {
       document.getElementById('winner').innerText = '';
       return;
     }
-    if (winnerId === userId) {
+    if (winnerName === playerName) {
       document.getElementById('winner').innerText = 'Selamat! Anda MENANG!';
-    } else if (currentPlayers.includes(userId)) {
+    } else if (currentPlayers.includes(playerName)) {
       document.getElementById('winner').innerText = 'Anda KALAH!';
     } else {
       document.getElementById('winner').innerText = '';
@@ -126,7 +118,7 @@
   function renderQueue() {
     const queueDiv = document.getElementById('queue');
     // Tampilkan antrian hanya jika user sedang menunggu giliran dan gameStatus 'playing'
-    if (gameStatus === 'playing' && !currentPlayers.includes(userId) && queueLength > 0) {
+    if (gameStatus === 'playing' && !currentPlayers.includes(playerName) && queueLength > 0) {
       queueDiv.style.display = 'block';
       queueDiv.innerText = `Menunggu giliran... Antrian pemain: ${queueLength}`;
     } else {
@@ -138,7 +130,7 @@
   // Tap area logic
   const tapArea = document.getElementById('tapArea');
   tapArea.addEventListener('click', () => {
-    if (gameStatus === 'playing' && currentPlayers.includes(userId)) {
+    if (gameStatus === 'playing' && currentPlayers.includes(playerName)) {
       socket.emit('playerAction');
     }
   });

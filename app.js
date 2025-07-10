@@ -41,8 +41,8 @@ function emitGameStatus() {
     winner,
     queueLength: queue.length,
   });
-  currentPlayers.forEach((userId) => {
-    io.to(userId).emit('gameStatusUpdate', {
+  currentPlayers.forEach((name) => {
+    io.to(name).emit('gameStatusUpdate', {
       gameStatus,
       currentPlayers,
       playersProgress,
@@ -57,11 +57,11 @@ function startCountdown() {
   emitGameStatus();
   let count = 3;
   io.to('display').emit('countdown', count);
-  currentPlayers.forEach((userId) => io.to(userId).emit('countdown', count));
+  currentPlayers.forEach((name) => io.to(name).emit('countdown', count));
   countdownTimer = setInterval(() => {
     count--;
     io.to('display').emit('countdown', count);
-    currentPlayers.forEach((userId) => io.to(userId).emit('countdown', count));
+    currentPlayers.forEach((name) => io.to(name).emit('countdown', count));
     if (count === 0) {
       clearInterval(countdownTimer);
       startGame();
@@ -77,12 +77,12 @@ function startGame() {
   emitGameStatus();
 }
 
-function finishGame(winnerId) {
+function finishGame(winnerName) {
   gameStatus = 'finished';
-  winner = winnerId;
+  winner = winnerName;
   emitGameStatus();
   io.to('display').emit('gameFinished', { winner });
-  currentPlayers.forEach((userId) => io.to(userId).emit('gameFinished', { winner }));
+  currentPlayers.forEach((name) => io.to(name).emit('gameFinished', { winner }));
   setTimeout(() => {
     // Reset for next game
     playersProgress[currentPlayers[0]] = 0;
@@ -103,9 +103,9 @@ function finishGame(winnerId) {
 }
 
 io.on('connection', (socket) => {
-  const { userId, role } = socket.handshake.query;
+  const { name, role } = socket.handshake.query;
 
-  console.log(`User connected: ${userId} as ${role}`);
+  console.log(`User connected: ${name} as ${role}`);
 
   if (role === 'display') {
     socket.join('display');
@@ -114,10 +114,10 @@ io.on('connection', (socket) => {
   }
 
   if (role === 'player') {
-    socket.join(userId); // biar bisa emit ke player tertentu
+    socket.join(name); // biar bisa emit ke player tertentu
     // Masukkan ke queue jika belum ada di queue atau currentPlayers
-    if (!queue.includes(userId) && !currentPlayers.includes(userId)) {
-      queue.push(userId);
+    if (!queue.includes(name) && !currentPlayers.includes(name)) {
+      queue.push(name);
     }
     // Jika belum ada 2 pemain aktif, ambil dari queue
     while (currentPlayers.length < 2 && queue.length > 0) {
@@ -131,24 +131,24 @@ io.on('connection', (socket) => {
   }
 
   socket.on('playerAction', () => {
-    if (role === 'player' && gameStatus === 'playing' && currentPlayers.includes(userId)) {
-      playersProgress[userId] = Math.min(1, (playersProgress[userId] || 0) + 0.05);
+    if (role === 'player' && gameStatus === 'playing' && currentPlayers.includes(name)) {
+      playersProgress[name] = Math.min(1, (playersProgress[name] || 0) + 0.05);
       emitGameStatus();
-      if (playersProgress[userId] >= 1 && !winner) {
-        finishGame(userId);
+      if (playersProgress[name] >= 1 && !winner) {
+        finishGame(name);
       }
     }
   });
 
   socket.on('disconnect', () => {
-    console.log(`User disconnected: ${userId}`);
+    console.log(`User disconnected: ${name}`);
     if (role === 'player') {
       // Hapus dari queue
-      queue = queue.filter((id) => id !== userId);
+      queue = queue.filter((n) => n !== name);
       // Jika sedang main, hapus dari currentPlayers
-      if (currentPlayers.includes(userId)) {
-        currentPlayers = currentPlayers.filter((id) => id !== userId);
-        delete playersProgress[userId];
+      if (currentPlayers.includes(name)) {
+        currentPlayers = currentPlayers.filter((n) => n !== name);
+        delete playersProgress[name];
         // Jika game sedang berlangsung, langsung akhiri dan pemain lain menang
         if (gameStatus === 'playing' && currentPlayers.length === 1) {
           finishGame(currentPlayers[0]);
