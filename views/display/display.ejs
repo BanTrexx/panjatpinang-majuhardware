@@ -4,7 +4,7 @@
   body {
     background: #222;
     color: #fff;
-    font-family: 'Segoe UI', Arial, sans-serif;
+    font-family: "Segoe UI", Arial, sans-serif;
     margin: 0;
     padding: 0;
     overflow: hidden;
@@ -26,8 +26,12 @@
     animation: countdownPop 0.3s;
   }
   @keyframes countdownPop {
-    0% { transform: scale(1.5); }
-    100% { transform: scale(1); }
+    0% {
+      transform: scale(1.5);
+    }
+    100% {
+      transform: scale(1);
+    }
   }
   #pinang-area {
     position: relative;
@@ -112,8 +116,14 @@
     animation: winnerPop 0.5s;
   }
   @keyframes winnerPop {
-    0% { transform: scale(0.5); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+      transform: scale(0.5);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
   }
   #queue {
     text-align: center;
@@ -127,12 +137,12 @@
 <div id="countdown"></div>
 <div id="pinang-area">
   <div class="pinang-tiang"></div>
-  <div id="avatar1" class="player-avatar avatar-1" style="display:none;">
+  <div id="avatar1" class="player-avatar avatar-1" style="display: none">
     <span id="label1" class="player-label"></span>
     <span id="name1"></span>
     <span id="percent1" class="percent-label"></span>
   </div>
-  <div id="avatar2" class="player-avatar avatar-2" style="display:none;">
+  <div id="avatar2" class="player-avatar avatar-2" style="display: none">
     <span id="label2" class="player-label"></span>
     <span id="name2"></span>
     <span id="percent2" class="percent-label"></span>
@@ -144,20 +154,20 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const socket = io({
-    query: { role: 'display', userId: 'display' }
+    query: { role: "display", name: "display" },
   });
 
   // Game state managed by display
   let currentPlayers = [];
   let playersProgress = {};
-  let gameStatus = 'waiting';
+  let gameStatus = "waiting";
   let winner = null;
   let queue = [];
   let countdownTimer = null;
 
   // --- Game Logic ---
   function emitGameStatus() {
-    socket.emit('gameStatusUpdate', {
+    socket.emit("gameStatusUpdate", {
       gameStatus,
       currentPlayers,
       playersProgress,
@@ -167,13 +177,13 @@
   }
 
   function startCountdown() {
-    gameStatus = 'countdown';
+    gameStatus = "countdown";
     emitGameStatus();
     let count = 3;
-    socket.emit('countdown', count);
+    socket.emit("countdown", count);
     countdownTimer = setInterval(() => {
       count--;
-      socket.emit('countdown', count);
+      socket.emit("countdown", count);
       if (count === 0) {
         clearInterval(countdownTimer);
         startGame();
@@ -182,7 +192,7 @@
   }
 
   function startGame() {
-    gameStatus = 'playing';
+    gameStatus = "playing";
     playersProgress[currentPlayers[0]] = 0;
     playersProgress[currentPlayers[1]] = 0;
     winner = null;
@@ -190,43 +200,43 @@
   }
 
   function finishGame(winnerName) {
-    gameStatus = 'finished';
+    gameStatus = "finished";
     winner = winnerName;
     emitGameStatus();
-    socket.emit('gameFinished', { winner });
+    socket.emit("gameFinished", { winner });
     setTimeout(() => {
       // Reset for next game
       playersProgress[currentPlayers[0]] = 0;
       playersProgress[currentPlayers[1]] = 0;
       winner = null;
-      gameStatus = 'waiting';
+      gameStatus = "waiting";
       // Minta app.js reset pemain dan ambil 2 pemain berikutnya
-      socket.emit('resetPlayers');
+      socket.emit("resetPlayers");
     }, 3000);
   }
 
   // --- Listen for events from app.js ---
-  socket.on('queueStatus', ({ queue: q, currentPlayers: cp }) => {
+  socket.on("queueStatus", ({ queue: q, currentPlayers: cp }) => {
     queue = q;
     currentPlayers = cp;
-    if (currentPlayers.length === 2 && gameStatus === 'waiting') {
+    if (currentPlayers.length === 2 && gameStatus === "waiting") {
       startCountdown();
     } else {
       emitGameStatus();
     }
   });
 
-  socket.on('newPlayers', ({ currentPlayers: cp }) => {
+  socket.on("newPlayers", ({ currentPlayers: cp }) => {
     currentPlayers = cp;
-    if (currentPlayers.length === 2 && gameStatus === 'waiting') {
+    if (currentPlayers.length === 2 && gameStatus === "waiting") {
       startCountdown();
     } else {
       emitGameStatus();
     }
   });
 
-  socket.on('playerAction', ({ name }) => {
-    if (gameStatus === 'playing' && currentPlayers.includes(name)) {
+  socket.on("playerAction", ({ name }) => {
+    if (gameStatus === "playing" && currentPlayers.includes(name)) {
       playersProgress[name] = Math.min(1, (playersProgress[name] || 0) + 0.05);
       emitGameStatus();
       if (playersProgress[name] >= 1 && !winner) {
@@ -235,21 +245,21 @@
     }
   });
 
-  socket.on('playerLeft', ({ name }) => {
+  socket.on("playerLeft", ({ name }) => {
     // Remove player from currentPlayers
     currentPlayers = currentPlayers.filter((n) => n !== name);
     delete playersProgress[name];
-    if (gameStatus === 'playing' && currentPlayers.length === 1) {
+    if (gameStatus === "playing" && currentPlayers.length === 1) {
       finishGame(currentPlayers[0]);
     } else {
       emitGameStatus();
     }
   });
 
-  socket.on('notEnoughPlayers', () => {
+  socket.on("notEnoughPlayers", () => {
     // End game if not enough players
-    if (gameStatus === 'playing' && currentPlayers.length < 2) {
-      gameStatus = 'waiting';
+    if (gameStatus === "playing" && currentPlayers.length < 2) {
+      gameStatus = "waiting";
       winner = null;
       emitGameStatus();
     }
@@ -257,74 +267,87 @@
 
   // --- UI rendering (unchanged) ---
   function renderStatus(status, queueLength) {
-    let text = '';
-    if (status === 'waiting') text = 'Menunggu pemain...';
-    if (status === 'countdown') text = 'Countdown dimulai!';
-    if (status === 'playing') text = 'Permainan sedang berlangsung!';
-    if (status === 'finished') text = 'Permainan selesai!';
-    document.getElementById('status').innerText = text;
-    document.getElementById('queue').innerText = `Antrian pemain: ${queueLength}`;
+    let text = "";
+    if (status === "waiting") text = "Menunggu pemain...";
+    if (status === "countdown") text = "Countdown dimulai!";
+    if (status === "playing") text = "Permainan sedang berlangsung!";
+    if (status === "finished") text = "Permainan selesai!";
+    document.getElementById("status").innerText = text;
+    document.getElementById(
+      "queue"
+    ).innerText = `Antrian pemain: ${queueLength}`;
   }
 
   function renderPlayers(players, progress) {
     // Player 1
     if (players[0]) {
-      const percent = ((progress[players[0]]||0)*100).toFixed(0);
-      const area = document.getElementById('pinang-area');
-      const avatar = document.getElementById('avatar1');
-      avatar.style.display = 'flex';
-      document.getElementById('name1').innerText = players[0]; // nama player
-      document.getElementById('label1').innerText = '';
-      document.getElementById('percent1').innerText = percent + '%';
+      const percent = ((progress[players[0]] || 0) * 100).toFixed(0);
+      const area = document.getElementById("pinang-area");
+      const avatar = document.getElementById("avatar1");
+      avatar.style.display = "flex";
+      document.getElementById("name1").innerText = players[0]; // nama player
+      document.getElementById("label1").innerText = "";
+      document.getElementById("percent1").innerText = percent + "%";
       // Hitung posisi bottom (0 = bawah, 1 = atas)
       const areaHeight = area.offsetHeight - 60; // 60 = tinggi avatar
-      avatar.style.bottom = (progress[players[0]]||0) * areaHeight + 'px';
+      avatar.style.bottom = (progress[players[0]] || 0) * areaHeight + "px";
     } else {
-      document.getElementById('avatar1').style.display = 'none';
+      document.getElementById("avatar1").style.display = "none";
     }
     // Player 2
     if (players[1]) {
-      const percent = ((progress[players[1]]||0)*100).toFixed(0);
-      const area = document.getElementById('pinang-area');
-      const avatar = document.getElementById('avatar2');
-      avatar.style.display = 'flex';
-      document.getElementById('name2').innerText = players[1]; // nama player
-      document.getElementById('label2').innerText = '';
-      document.getElementById('percent2').innerText = percent + '%';
+      const percent = ((progress[players[1]] || 0) * 100).toFixed(0);
+      const area = document.getElementById("pinang-area");
+      const avatar = document.getElementById("avatar2");
+      avatar.style.display = "flex";
+      document.getElementById("name2").innerText = players[1]; // nama player
+      document.getElementById("label2").innerText = "";
+      document.getElementById("percent2").innerText = percent + "%";
       const areaHeight = area.offsetHeight - 60;
-      avatar.style.bottom = (progress[players[1]]||0) * areaHeight + 'px';
+      avatar.style.bottom = (progress[players[1]] || 0) * areaHeight + "px";
     } else {
-      document.getElementById('avatar2').style.display = 'none';
+      document.getElementById("avatar2").style.display = "none";
     }
   }
 
   function renderWinner(winner) {
-    document.getElementById('winner').innerText = winner ? `Pemenang: ${winner}` : '';
+    document.getElementById("winner").innerText = winner
+      ? `Pemenang: ${winner}`
+      : "";
   }
 
-  socket.on('gameStatusUpdate', ({ gameStatus, currentPlayers: players, playersProgress: progress, winner, queueLength }) => {
-    currentPlayers = players;
-    playersProgress = progress;
-    renderStatus(gameStatus, queueLength);
-    renderPlayers(players, progress);
-    renderWinner(winner);
-    if (gameStatus !== 'countdown') {
-      document.getElementById('countdown').innerText = '';
+  socket.on(
+    "gameStatusUpdate",
+    ({
+      gameStatus,
+      currentPlayers: players,
+      playersProgress: progress,
+      winner,
+      queueLength,
+    }) => {
+      currentPlayers = players;
+      playersProgress = progress;
+      renderStatus(gameStatus, queueLength);
+      renderPlayers(players, progress);
+      renderWinner(winner);
+      if (gameStatus !== "countdown") {
+        document.getElementById("countdown").innerText = "";
+      }
+      if (gameStatus !== "finished") {
+        document.getElementById("winner").innerText = "";
+      }
     }
-    if (gameStatus !== 'finished') {
-      document.getElementById('winner').innerText = '';
-    }
-  });
+  );
 
-  socket.on('countdown', (count) => {
-    const el = document.getElementById('countdown');
-    el.innerText = count > 0 ? ` ${count} ` : '';
-    el.style.animation = 'none';
+  socket.on("countdown", (count) => {
+    const el = document.getElementById("countdown");
+    el.innerText = count > 0 ? ` ${count} ` : "";
+    el.style.animation = "none";
     el.offsetHeight; // trigger reflow
     el.style.animation = null;
   });
 
-  socket.on('gameFinished', ({ winner }) => {
+  socket.on("gameFinished", ({ winner }) => {
     renderWinner(winner);
   });
 </script>
