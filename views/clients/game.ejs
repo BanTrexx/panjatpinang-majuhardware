@@ -158,6 +158,10 @@
   socket.on('gameFinished', ({ winner: win }) => {
     renderWinner(win);
     renderQueue();
+    // Redirect ke form setelah 3 detik
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 5000);
   });
 </script>
 
