@@ -1,7 +1,8 @@
 <%- include('../partials/clients/header') %>
 
 <style>
-  body, html {
+  body,
+  html {
     margin: 0;
     padding: 0;
     height: 100%;
@@ -84,83 +85,100 @@
   // Ambil nama player dari EJS
   const playerName = "<%= nama %>";
   const socket = io({
-    query: { role: 'player', name: playerName }
+    query: { role: "player", name: playerName },
   });
 
-  let gameStatus = 'waiting';
+  let gameStatus = "waiting";
   let currentPlayers = [];
   let winner = null;
   let queueLength = 0;
 
+  document.addEventListener("DOMContentLoaded", function () {
+    renderStatus(gameStatus);
+  });
+
   function renderStatus(status) {
-    let text = '';
-    if (status === 'waiting') text = 'Menunggu giliran bermain...';
-    if (status === 'countdown') text = 'Countdown dimulai!';
-    if (status === 'playing') text = 'Ayo tap secepatnya!';
-    if (status === 'finished') text = 'Permainan selesai!';
-    document.getElementById('status').innerText = text;
+    let text = "";
+    if (status === "waiting") text = "Menunggu giliran bermain...";
+    if (status === "countdown") text = "Countdown dimulai!";
+    if (status === "playing") text = "Ayo tap secepatnya!";
+    if (status === "finished") text = "Permainan selesai!";
+    document.getElementById("status").innerText = text;
   }
 
   function renderWinner(winnerName) {
     if (!winnerName) {
-      document.getElementById('winner').innerText = '';
+      document.getElementById("winner").innerText = "";
       return;
     }
     if (winnerName === playerName) {
-      document.getElementById('winner').innerText = 'Selamat! Anda MENANG!';
+      document.getElementById("winner").innerText = "Selamat! Anda MENANG!";
     } else if (currentPlayers.includes(playerName)) {
-      document.getElementById('winner').innerText = 'Anda KALAH!';
+      document.getElementById("winner").innerText = "Anda KALAH!";
     } else {
-      document.getElementById('winner').innerText = '';
+      document.getElementById("winner").innerText = "";
     }
   }
 
   function renderQueue() {
-    const queueDiv = document.getElementById('queue');
+    const queueDiv = document.getElementById("queue");
     // Tampilkan antrian hanya jika user sedang menunggu giliran dan gameStatus 'playing'
-    if (gameStatus === 'playing' && !currentPlayers.includes(playerName) && queueLength > 0) {
-      queueDiv.style.display = 'block';
+    if (
+      gameStatus === "playing" &&
+      !currentPlayers.includes(playerName) &&
+      queueLength > 0
+    ) {
+      queueDiv.style.display = "block";
       queueDiv.innerText = `Menunggu giliran... Antrian pemain: ${queueLength}`;
     } else {
-      queueDiv.style.display = 'none';
-      queueDiv.innerText = '';
+      queueDiv.style.display = "none";
+      queueDiv.innerText = "";
     }
   }
 
   // Tap area logic
-  const tapArea = document.getElementById('tapArea');
-  tapArea.addEventListener('click', () => {
-    if (gameStatus === 'playing' && currentPlayers.includes(playerName)) {
-      socket.emit('playerAction');
+  const tapArea = document.getElementById("tapArea");
+  tapArea.addEventListener("click", () => {
+    if (gameStatus === "playing" && currentPlayers.includes(playerName)) {
+      socket.emit("playerAction");
     }
   });
 
   // --- Only listen for updates from app.js (relayed from display) ---
-  socket.on('gameStatusUpdate', ({ gameStatus: status, currentPlayers: players, winner: win, queueLength: ql }) => {
-    gameStatus = status;
-    currentPlayers = players;
-    winner = win;
-    queueLength = ql;
-    renderStatus(status);
-    renderWinner(win);
-    renderQueue();
-    if (status !== 'countdown') {
-      document.getElementById('countdown').innerText = '';
+  socket.on(
+    "gameStatusUpdate",
+    ({
+      gameStatus: status,
+      currentPlayers: players,
+      winner: win,
+      queueLength: ql,
+    }) => {
+      gameStatus = status;
+      currentPlayers = players;
+      winner = win;
+      queueLength = ql;
+      renderStatus(status);
+      renderWinner(win);
+      renderQueue();
+      if (status !== "countdown") {
+        document.getElementById("countdown").innerText = "";
+      }
+      if (status !== "finished") {
+        document.getElementById("winner").innerText = "";
+      }
     }
-    if (status !== 'finished') {
-      document.getElementById('winner').innerText = '';
-    }
+  );
+
+  socket.on("countdown", (count) => {
+    document.getElementById("countdown").innerText =
+      count > 0 ? `Mulai dalam: ${count}` : "";
   });
 
-  socket.on('countdown', (count) => {
-    document.getElementById('countdown').innerText = count > 0 ? `Mulai dalam: ${count}` : '';
-  });
-
-  socket.on('gameFinished', ({ winner: win }) => {
+  socket.on("gameFinished", ({ winner: win }) => {
     renderWinner(win);
     renderQueue();
     setTimeout(() => {
-      window.location.href = '/';
+      window.location.href = "/";
     }, 5000);
   });
 </script>
