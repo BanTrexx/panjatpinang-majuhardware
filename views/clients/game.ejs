@@ -8,76 +8,198 @@
     height: 100%;
     background-color: #1e1e1e;
     color: #fff;
-    font-family: Arial, sans-serif;
+    font-family: "Lexend", Arial, sans-serif;
     overflow: hidden;
   }
-  .tap-area {
-    width: 100vw;
-    height: 100vh;
+
+  .waiting-container {
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
     align-items: center;
-    cursor: pointer;
-    user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    text-align: center;
-    padding: 0;
-    box-sizing: border-box;
-    position: relative;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 32px 0;
   }
-  .info {
-    width: 100vw;
-    max-width: 600px;
-    margin: 0 auto;
-    padding-top: 30px;
+
+  .logo-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 32px;
+    margin-bottom: 24px;
+  }
+
+  .logo-img {
+    width: 80px;
+    height: auto;
+    display: block;
+  }
+
+  .player-name-card {
+    background: #fff;
+    border-radius: 32px;
+    padding: 10px 32px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 18px;
+    color: #222;
+    display: inline-block;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  }
+
+  .avatar-big {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 18px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
+    background: #fff;
+    border: 4px solid #fffbe7;
+  }
+
+  .status-card {
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+    padding: 24px 18px 18px 18px;
+    margin-bottom: 32px;
+    width: 100%;
+    max-width: 370px;
+    text-align: center;
+    color: #888;
+    position: relative;
     z-index: 2;
   }
-  #status {
-    font-size: 2em;
-    font-weight: bold;
-    margin-bottom: 10px;
+
+  .timer-row {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 18px;
+    margin-top: 10px;
   }
-  #countdown {
-    font-size: 3em;
-    color: #ffeb3b;
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
-  #winner {
-    font-size: 2em;
-    color: #4caf50;
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
-  #queue {
-    font-size: 1.1em;
-    color: #bbb;
-    margin-bottom: 10px;
-    display: none;
-  }
-  .tap-hint {
-    position: absolute;
-    bottom: 40px;
-    left: 0;
-    width: 100vw;
+
+  .timer-num {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #222;
+    letter-spacing: 2px;
+    min-width: 48px;
     text-align: center;
-    font-size: 2em;
-    color: #ffeb3b;
-    opacity: 0.7;
-    pointer-events: none;
+  }
+
+  .timer-label {
+    font-size: 0.9rem;
+    color: #aaa;
+    margin-top: -8px;
+    text-align: center;
+  }
+
+  .btn-row {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 36px;
+    margin-top: 36px;
+  }
+
+  .btn-row .text-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .circle-btn {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #7ecb8f 0%, #5fa96d 100%);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.13);
+    border: none;
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.2s;
+    position: relative;
+  }
+
+  .circle-btn:active {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(2px);
+  }
+
+  .btn-label {
+    margin-top: 12px;
+    background: #fff;
+    color: #f9a825;
+    font-weight: 700;
+    border-radius: 24px;
+    padding: 6px 22px;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    display: block;
+    text-align: center;
+    width: 160px;
+    min-width: 160px;
+  }
+
+  @media (max-width: 500px) {
+    .avatar-big {
+      width: 90px;
+      height: 90px;
+    }
+
+    .circle-btn {
+      width: 80px;
+      height: 80px;
+      font-size: 1.1rem;
+    }
+
+    .btn-label {
+      font-size: 0.95rem;
+      padding: 4px 10px;
+      width: 120px;
+      min-width: 120px;
+    }
+
+    .status-card {
+      padding: 14px 4vw 10px 4vw;
+      max-width: 98vw;
+    }
   }
 </style>
 
-<div class="tap-area" id="tapArea">
-  <div class="info">
+<div class="waiting-container">
+  <div class="logo-center">
+    <img src="/assets/img/logo-maju-hardware.png" alt="MAJUHARDWARE Logo" class="logo-img" />
+  </div>
+  <div class="player-name-card"><%= nama %></div>
+  <% if (avatar) { %>
+  <img src="/assets/img/avatar/<%= avatar %>" alt="Avatar" class="avatar-big" />
+  <% } %>
+  <div class="status-card">
     <div id="status"></div>
     <div id="countdown"></div>
     <div id="winner"></div>
     <div id="queue"></div>
   </div>
-  <div class="tap-hint">Tap di mana saja untuk memanjat!</div>
+  <div class="btn-row">
+    <div class="text-center">
+      <button class="circle-btn" id="btnAvoid" type="button" disabled></button>
+      <div class="btn-label">MENGHINDAR</div>
+    </div>
+    <div class="text-center">
+      <button class="circle-btn" id="btnClimb" type="button"></button>
+      <div class="btn-label">PANJAT</div>
+    </div>
+  </div>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -99,7 +221,7 @@
 
   function renderStatus(status) {
     let text = "";
-    if (status === "waiting") text = "Menunggu giliran bermain...";
+    if (status === "waiting") text = "Tunggu pemain lain menyelesaikan permainannya dalam waktu";
     if (status === "countdown") text = "Countdown dimulai!";
     if (status === "playing") text = "Ayo tap secepatnya!";
     if (status === "finished") text = "Permainan selesai!";
@@ -123,11 +245,7 @@
   function renderQueue() {
     const queueDiv = document.getElementById("queue");
     // Tampilkan antrian hanya jika user sedang menunggu giliran dan gameStatus 'playing'
-    if (
-      gameStatus === "playing" &&
-      !currentPlayers.includes(playerName) &&
-      queueLength > 0
-    ) {
+    if (gameStatus === "playing" && !currentPlayers.includes(playerName) && queueLength > 0) {
       queueDiv.style.display = "block";
       queueDiv.innerText = `Menunggu giliran... Antrian pemain: ${queueLength}`;
     } else {
@@ -137,41 +255,32 @@
   }
 
   // Tap area logic
-  const tapArea = document.getElementById("tapArea");
-  tapArea.addEventListener("click", () => {
+  const btnClimb = document.getElementById("btnClimb");
+  btnClimb.addEventListener("click", () => {
     if (gameStatus === "playing" && currentPlayers.includes(playerName)) {
       socket.emit("playerAction");
     }
   });
 
   // --- Only listen for updates from app.js (relayed from display) ---
-  socket.on(
-    "gameStatusUpdate",
-    ({
-      gameStatus: status,
-      currentPlayers: players,
-      winner: win,
-      queueLength: ql,
-    }) => {
-      gameStatus = status;
-      currentPlayers = players;
-      winner = win;
-      queueLength = ql;
-      renderStatus(status);
-      renderWinner(win);
-      renderQueue();
-      if (status !== "countdown") {
-        document.getElementById("countdown").innerText = "";
-      }
-      if (status !== "finished") {
-        document.getElementById("winner").innerText = "";
-      }
+  socket.on("gameStatusUpdate", ({ gameStatus: status, currentPlayers: players, winner: win, queueLength: ql }) => {
+    gameStatus = status;
+    currentPlayers = players;
+    winner = win;
+    queueLength = ql;
+    renderStatus(status);
+    renderWinner(win);
+    renderQueue();
+    if (status !== "countdown") {
+      document.getElementById("countdown").innerText = "";
     }
-  );
+    if (status !== "finished") {
+      document.getElementById("winner").innerText = "";
+    }
+  });
 
   socket.on("countdown", (count) => {
-    document.getElementById("countdown").innerText =
-      count > 0 ? `Mulai dalam: ${count}` : "";
+    document.getElementById("countdown").innerText = count > 0 ? `Mulai dalam: ${count}` : "";
   });
 
   socket.on("gameFinished", ({ winner: win }) => {

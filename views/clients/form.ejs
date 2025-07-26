@@ -1,27 +1,159 @@
 <%- include('../partials/clients/header') %>
 
-<main>
-  <div
-    class="container d-flex justify-content-center align-items-center min-vh-100"
-  >
-    <div class="row w-100">
-      <div class="form w-100 mt-4">
-        <form action="/game" method="POST">
-          <div class="mb-3">
-            <label for="name" class="form-label">Nama</label>
-            <input
-              type="name"
-              class="form-control"
-              id="name"
-              name="name"
-              placeholder="input your name here..."
-            />
-          </div>
-          <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
-      </div>
+<style>
+  .shadow-soft {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    background-color: white;
+  }
+
+  .custom-btn {
+    background: linear-gradient(90deg, #9f7fff 0%, #8055fe 100%);
+    color: white;
+    padding: 0.75rem 2.5rem;
+    border: none;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: 0 10px 25px rgba(128, 85, 254, 0.4);
+    transition: all 0.3s ease;
+  }
+
+  .custom-btn:hover {
+    box-shadow: 0 12px 30px rgba(128, 85, 254, 0.6);
+    transform: translateY(-2px);
+  }
+
+  .avatar-wrapper {
+    width: 48px;
+    height: 48px;
+    min-width: 40px;
+    min-height: 40px;
+    max-width: 56px;
+    max-height: 56px;
+    overflow: hidden;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    filter: grayscale(100%);
+    transition: all 0.3s ease;
+  }
+
+  .avatar-radio:checked ~ .avatar-wrapper {
+    filter: none;
+    border-color: #f9d857;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+  }
+
+  .avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar-option .avatar-wrapper {
+    filter: grayscale(100%);
+    border: 2px solid transparent;
+    transition: all 0.3s;
+  }
+
+  .avatar-wrapper.selected {
+    filter: none;
+    border-color: #f9d857;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+  }
+
+  .avatar-option {
+    margin: 0 10px;
+    flex: 0 0 auto;
+  }
+
+  .card-body.d-flex {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    justify-content: flex-start;
+    gap: 12px;
+    padding-bottom: 8px;
+  }
+
+  .logo-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 32px;
+    margin-bottom: 24px;
+  }
+
+  .logo-img {
+    width: 80px;
+    height: auto;
+    display: block;
+  }
+</style>
+
+<main class="d-flex justify-content-center align-items-center min-vh-100">
+  <div class="px-4 text-center" style="max-width: 400px; width: 100%">
+    <div class="logo-center">
+      <img src="/assets/img/logo-maju-hardware.png" alt="MAJUHARDWARE Logo" class="logo-img" />
     </div>
+
+    <p class="mb-4" style="font-family: 'Lexend', sans-serif; font-weight: 700; font-size: 25px; color: #000000">
+      ISI DATA DIRI SEBELUM
+      <br />
+      MEMULAI PERMAINAN.
+    </p>
+
+    <form action="/tutor" method="POST">
+      <div class="d-flex justify-content-center" style="margin-bottom: 0">
+        <div class="px-4 py-2 text-dark" style="background-color: #f9d857; border-radius: 20px; font-size: 1.25rem; margin-bottom: -20px; position: relative; z-index: 2">Pilih Karaktermu!</div>
+      </div>
+
+      <div class="card mb-3 shadow-lg" style="border-radius: 30px; background-color: white; height: 100px">
+        <div class="card-body d-flex justify-content-between align-items-center gap-2">
+          <% const avatars=['1.png', '2.png' , '3.png' , '4.png' ]; %> <% avatars.forEach((avatar, index)=> { %>
+          <label class="avatar-option text-center position-relative">
+            <input type="radio" name="avatar" value="<%= avatar %>" class="d-none avatar-radio" <%=index===0 ? 'checked' : '' %> />
+            <div class="avatar-wrapper mx-auto">
+              <img src="/assets/img/avatar/<%= avatar %>" alt="Avatar <%= index + 1 %>" class="avatar-img rounded-circle" />
+            </div>
+          </label>
+          <% }) %>
+        </div>
+      </div>
+      <div class="form-floating mb-3 shadow-soft">
+        <input type="text" class="form-control rounded-4" id="name" placeholder="Nama Karakter" name="name" required />
+        <label for="karakter">Nama Karakter</label>
+      </div>
+      <div class="form-floating mb-3 shadow-soft">
+        <input type="text" class="form-control rounded-4" id="namalengkap" placeholder="Nama lengkap" name="namalengkap" required />
+        <label for="name">Nama lengkap</label>
+      </div>
+      <div class="form-floating mb-3 shadow-soft">
+        <input type="number" class="form-control rounded-4" id="notlp" placeholder="Nomor HP" name="notlp" required />
+        <label for="notlp">Nomor HP</label>
+      </div>
+      <div class="form-floating mb-4 shadow-soft">
+        <input type="text" class="form-control rounded-4" id="ig" placeholder="Instagram" name="ig" required />
+        <label for="ig">Akun Instagram</label>
+      </div>
+
+      <button type="submit" class="custom-btn">Daftar</button>
+    </form>
   </div>
 </main>
 
 <%- include('../partials/clients/footer') %>
+
+<script>
+  document.querySelectorAll(".avatar-radio").forEach((radio) => {
+    radio.addEventListener("change", function () {
+      document.querySelectorAll(".avatar-wrapper").forEach((w) => w.classList.remove("selected"));
+      if (this.checked) {
+        this.nextElementSibling.classList.add("selected");
+      }
+    });
+    // Initial state
+    if (radio.checked) {
+      radio.nextElementSibling.classList.add("selected");
+    }
+  });
+</script>

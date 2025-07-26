@@ -1,0 +1,38 @@
+<%- include('../partials/clients/header') %>
+
+<style>
+  /* Menghilangkan underline dari a */
+  a {
+    text-decoration: none;
+  }
+
+  /* Typography Bowlby One SC ukuran 40px */
+  .bowlby-text {
+    font-family: "Bowlby One SC", cursive;
+    font-size: 40px;
+  }
+
+  .play-btn {
+    background: linear-gradient(90deg, #ffdcac 0%, #e06800 100%);
+    color: white;
+    padding: 0.75rem 2.5rem;
+    border: none;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: 0 10px 25px rgba(224, 104, 0, 0.4);
+    transition: all 0.3s ease;
+  }
+
+  .play-btn:hover {
+    box-shadow: 0 12px 30px rgba(224, 104, 0, 0.6); /* shadow oranye lebih pekat */
+    transform: translateY(-2px);
+    background: linear-gradient(90deg, #ffe0b3 0%, #ff7a00 100%); /* lebih terang */
+  }
+</style>
+
+<main class="d-flex justify-content-center align-items-center min-vh-100 position-relative" style="background: url('/assets/img/bg.png') no-repeat center center; background-size: cover; background-color: #000; overflow: hidden">
+  <a href="/form" class="play-btn bowlby-text position-absolute start-50 translate-middle-x" style="bottom: 150px">PLAY!</a>
+</main>
+
+<%- include('../partials/clients/footer') %>

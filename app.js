@@ -3,6 +3,7 @@ const http = require('http')
 const { Server } = require("socket.io");
 const path = require('path')
 const cors = require('cors')
+const session = require('express-session');
 const ClientRoutes = require('./backend/routes/client')
 const DisplayRoutes = require('./backend/routes/display')
 
@@ -18,6 +19,12 @@ const io = new Server(server, {
 
 const PORT = 3000
 
+app.use(session({
+  secret: 'rahasia_aman',
+  resave: false,
+  saveUninitialized: true
+}));
+
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static(path.join(__dirname, 'public')))
 app.set("views", path.join(__dirname, "views"))
@@ -25,6 +32,8 @@ app.set("view engine", "ejs")
 
 app.use(ClientRoutes)
 app.use(DisplayRoutes)
+
+
 
 let queue = [];
 let currentPlayers = [];

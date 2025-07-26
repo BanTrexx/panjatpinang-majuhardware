@@ -179,7 +179,7 @@
   function startCountdown() {
     gameStatus = "countdown";
     emitGameStatus();
-    let count = 3;
+    let count = 60;
     socket.emit("countdown", count);
     countdownTimer = setInterval(() => {
       count--;
@@ -273,9 +273,7 @@
     if (status === "playing") text = "Permainan sedang berlangsung!";
     if (status === "finished") text = "Permainan selesai!";
     document.getElementById("status").innerText = text;
-    document.getElementById(
-      "queue"
-    ).innerText = `Antrian pemain: ${queueLength}`;
+    document.getElementById("queue").innerText = `Antrian pemain: ${queueLength}`;
   }
 
   function renderPlayers(players, progress) {
@@ -311,33 +309,22 @@
   }
 
   function renderWinner(winner) {
-    document.getElementById("winner").innerText = winner
-      ? `Pemenang: ${winner}`
-      : "";
+    document.getElementById("winner").innerText = winner ? `Pemenang: ${winner}` : "";
   }
 
-  socket.on(
-    "gameStatusUpdate",
-    ({
-      gameStatus,
-      currentPlayers: players,
-      playersProgress: progress,
-      winner,
-      queueLength,
-    }) => {
-      currentPlayers = players;
-      playersProgress = progress;
-      renderStatus(gameStatus, queueLength);
-      renderPlayers(players, progress);
-      renderWinner(winner);
-      if (gameStatus !== "countdown") {
-        document.getElementById("countdown").innerText = "";
-      }
-      if (gameStatus !== "finished") {
-        document.getElementById("winner").innerText = "";
-      }
+  socket.on("gameStatusUpdate", ({ gameStatus, currentPlayers: players, playersProgress: progress, winner, queueLength }) => {
+    currentPlayers = players;
+    playersProgress = progress;
+    renderStatus(gameStatus, queueLength);
+    renderPlayers(players, progress);
+    renderWinner(winner);
+    if (gameStatus !== "countdown") {
+      document.getElementById("countdown").innerText = "";
     }
-  );
+    if (gameStatus !== "finished") {
+      document.getElementById("winner").innerText = "";
+    }
+  });
 
   socket.on("countdown", (count) => {
     const el = document.getElementById("countdown");
