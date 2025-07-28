@@ -1,0 +1,140 @@
+<%- include('../partials/display/header') %>
+
+<style>
+  body,
+  html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  .scene {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+
+  .anim {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: auto;
+    max-height: 100%;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .player {
+    max-width: 20px; /* ukuran karakter */
+    position: absolute;
+    bottom: 120px;
+    z-index: 2;
+  }
+
+  .player video {
+    width: 1000px; /* atau ukuran yang kamu inginkan */
+    height: auto;
+  }
+
+  .player1 {
+    left: -23%;
+  }
+
+  .player1 video {
+    transform: scaleX(-1);
+  }
+
+  .player2 {
+    left: 30%;
+  }
+
+  .fg {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 3;
+  }
+</style>
+
+<div class="scene">
+  <!-- Background -->
+  <img src="/assets/env/bg_fg/bg.png" class="bg" alt="Background" />
+
+  <!-- Player 1 -->
+  <div class="player player1">
+    <video id="player1vid" autoplay muted playsinline></video>
+  </div>
+
+  <!-- Player 2 -->
+  <div class="player player2">
+    <video id="player2vid" autoplay muted playsinline></video>
+  </div>
+
+  <!-- Batang pinang (video) -->
+  <video src="/assets/env/item/pinang/IMG_1002.webm" class="anim" autoplay muted loop playsinline></video>
+
+  <!-- Foreground -->
+  <img src="/assets/env/bg_fg/fg.png" class="fg" alt="Foreground" />
+</div>
+
+<script>
+  // Variabel sumber video
+  const SRC = {
+    p1: "/assets/char/mas_ware/jump_in/IMG_0991.webm",
+    p2: "/assets/char/mas_ware/jump_in/IMG_0991.webm",
+  };
+
+  // Ambil elemen video jadi variabel
+  const player1vid = document.getElementById("player1vid");
+  const player2vid = document.getElementById("player2vid");
+
+  // Helper untuk inisialisasi video
+  function initVideo(el, src, { autoplay = true, muted = true, loop = false } = {}) {
+    el.src = src;
+    el.autoplay = autoplay;
+    el.muted = muted;
+    el.loop = loop;
+    el.playsInline = true; // penting di mobile
+
+    // Stop di frame terakhir
+    el.addEventListener("ended", () => el.pause(), { once: true });
+  }
+
+  // Inisialisasi keduanya
+  initVideo(player1vid, SRC.p1, { autoplay: true, muted: true, loop: false });
+  initVideo(player2vid, SRC.p2, { autoplay: true, muted: true, loop: false });
+
+  // Contoh kontrol lewat variabel:
+  function pausePlayers() {
+    player1vid.pause();
+    player2vid.pause();
+  }
+
+  function playPlayers() {
+    player1vid.play();
+    player2vid.play();
+  }
+
+  // Contoh ganti source dinamis:
+  function changeP1ToRunAnim() {
+    player1vid.src = "/assets/char/mas_ware/run/run.webm";
+    player1vid.currentTime = 0;
+    player1vid.play();
+  }
+</script>
+
+<%- include('../partials/display/footer') %>

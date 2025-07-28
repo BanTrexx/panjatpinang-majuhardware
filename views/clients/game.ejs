@@ -57,6 +57,19 @@
     z-index: 2;
   }
 
+  .score-card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+    padding: 24px 18px 18px 18px;
+    margin-bottom: 32px;
+    width: 100%;
+    max-width: 370px;
+    text-align: center;
+    color: #888;
+    position: relative;
+  }
+
   .timer-row {
     display: flex;
     justify-content: center;
@@ -143,21 +156,35 @@
       padding: 14px 4vw 10px 4vw;
       max-width: 98vw;
     }
+    .score-card {
+      padding: 14px 4vw 10px 4vw;
+      max-width: 98vw;
+    }
   }
 </style>
 
 <main class="d-flex justify-content-center align-items-start min-vh-100 mt-5">
   <div class="px-4 text-center" style="max-width: 400px; width: 100%">
+    <div id="skor-permainan">
+      <div class="d-flex justify-content-center" style="margin-bottom: 0">
+        <div class="px-4 py-2 text-dark" style="background-color: #f9d857; border-radius: 20px; font-size: 16px; color: #454545; font-family: 'Lexend', sans-serif; margin-bottom: -20px; position: relative; z-index: 2">Skor Permainan</div>
+      </div>
+    </div>
+    <div class="score-card">
+      <div id="score-point"></div>
+    </div>
     <div class="player-name-card"><%= nama %></div>
     <% if (avatar) { %>
     <img src="/assets/img/avatar/<%= avatar %>" alt="Avatar" class="avatar-big" />
     <% } %>
+
     <div class="status-card">
       <div id="status"></div>
       <div id="countdown"></div>
       <div id="winner"></div>
       <div id="queue"></div>
     </div>
+
     <div class="btn-row">
       <div class="text-center">
         <button class="circle-btn" id="btnAvoid" type="button" disabled></button>
@@ -231,6 +258,23 @@
     }
   });
 
+  function updateScoreVisibility() {
+    const skorContainer = document.getElementById("skor-permainan");
+    const scoreCard = document.querySelector(".score-card");
+
+    if ((gameStatus === "playing" && currentPlayers.includes(playerName)) || gameStatus === "finished") {
+      skorContainer.style.display = "block";
+      scoreCard.style.display = "block";
+    } else {
+      skorContainer.style.display = "none";
+      scoreCard.style.display = "none";
+    }
+  }
+
+  socket.on("scoreUpdate", (score) => {
+    document.getElementById("score-point").innerText = score;
+  });
+
   // --- Only listen for updates from app.js (relayed from display) ---
   socket.on("gameStatusUpdate", ({ gameStatus: status, currentPlayers: players, winner: win, queueLength: ql }) => {
     gameStatus = status;
@@ -240,6 +284,8 @@
     renderStatus(status);
     renderWinner(win);
     renderQueue();
+    updateScoreVisibility();
+
     if (status !== "countdown") {
       document.getElementById("countdown").innerText = "";
     }
@@ -249,12 +295,15 @@
   });
 
   socket.on("countdown", (count) => {
-    document.getElementById("countdown").innerText = count > 0 ? `Mulai dalam: ${count}` : "";
+    document.getElementById("countdown").innerText = count > 0 ? `${count}` : "";
   });
 
-  socket.on("gameFinished", ({ winner: win }) => {
+  socket.on("gameFinished", ({ winner: win, score }) => {
     renderWinner(win);
     renderQueue();
+    gameStatus = "finished";
+    document.getElementById("score-point").innerText = score;
+    updateScoreVisibility();
     setTimeout(() => {
       window.location.href = "/";
     }, 5000);
