@@ -55,7 +55,9 @@
     background-color: #ffde74;
     border-radius: 20px;
     padding: 8px 16px;
-    font-size: 14px;
+    font-size: 16px;
+    font-weight: 500; /* Medium weight */
+    font-family: "Lexend", sans-serif;
     margin-bottom: 15px;
     font-weight: 500;
     color: #222;
@@ -63,7 +65,7 @@
 
   .avatars {
     display: flex;
-    gap: 10px;
+    gap: 50px;
     justify-content: center;
     margin-bottom: 20px;
   }
@@ -73,20 +75,32 @@
     border-radius: 20px;
     padding: 10px;
     width: 100%;
-    max-width: 140px;
+    max-width: 148px;
+    height: auto;
+    aspect-ratio: 148 / 262;
     text-align: center;
     cursor: pointer;
     transition: transform 0.2s;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.1);
   }
 
   .avatar-card:hover {
     transform: translateY(-5px);
   }
 
+  .avatar-card {
+    position: relative;
+    overflow: visible; /* default-nya biasanya hidden */
+    z-index: 1;
+  }
+
   .avatar-img {
-    width: 100%;
+    width: 130%; /* lebih besar dari card */
     height: auto;
+    object-fit: cover;
+    position: absolute;
+    transform: translateX(-50%);
+    z-index: 2;
   }
 
   .gender-buttons {
@@ -141,7 +155,6 @@
     </p>
 
     <form action="/tutor" method="POST">
-
       <div id="dataDiriSection">
         <div class="form-floating mb-3 shadow-soft">
           <input type="text" class="form-control rounded-4" name="name" placeholder="Nama Karakter" required />
@@ -203,7 +216,7 @@
     document.getElementById("dataDiriSection").style.display = "none";
     document.getElementById("genderAvatarSection").style.display = "block";
   });
-  
+
   const btnMale = document.getElementById("btnMale");
   const btnFemale = document.getElementById("btnFemale");
   const avatarContainer = document.getElementById("avatarContainer");
