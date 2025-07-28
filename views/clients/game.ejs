@@ -21,20 +21,6 @@
     padding: 32px 0;
   }
 
-  .logo-center {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 32px;
-    margin-bottom: 24px;
-  }
-
-  .logo-img {
-    width: 80px;
-    height: auto;
-    display: block;
-  }
-
   .player-name-card {
     background: #fff;
     border-radius: 100px;
@@ -48,14 +34,10 @@
   }
 
   .avatar-big {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
     margin-bottom: 18px;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
-    background: #fff;
-    border: 4px solid #fffbe7;
   }
 
   .status-card {
@@ -69,6 +51,7 @@
     text-align: center;
     color: #888;
     position: relative;
+    margin-top: -50px;
     z-index: 2;
   }
 
@@ -149,11 +132,6 @@
   }
 
   @media (max-width: 500px) {
-    .avatar-big {
-      width: 90px;
-      height: 90px;
-    }
-
     .circle-btn {
       width: 80px;
       height: 80px;
@@ -176,31 +154,30 @@
   }
 </style>
 
-<div class="waiting-container">
-  <div class="logo-center">
-    <img src="/assets/img/logo-maju-hardware.png" alt="MAJUHARDWARE Logo" class="logo-img" />
-  </div>
-  <div class="player-name-card"><%= nama %></div>
-  <% if (avatar) { %>
-  <img src="/assets/img/avatar/<%= avatar %>" alt="Avatar" class="avatar-big" />
-  <% } %>
-  <div class="status-card">
-    <div id="status"></div>
-    <div id="countdown"></div>
-    <div id="winner"></div>
-    <div id="queue"></div>
-  </div>
-  <div class="btn-row">
-    <div class="text-center">
-      <button class="circle-btn" id="btnAvoid" type="button" disabled></button>
-      <div class="btn-label">MENGHINDAR</div>
+<main class="d-flex justify-content-center align-items-start min-vh-100 mt-5">
+  <div class="px-4 text-center" style="max-width: 400px; width: 100%">
+    <div class="player-name-card"><%= nama %></div>
+    <% if (avatar) { %>
+    <img src="/assets/img/avatar/<%= avatar %>" alt="Avatar" class="avatar-big" />
+    <% } %>
+    <div class="status-card">
+      <div id="status"></div>
+      <div id="countdown"></div>
+      <div id="winner"></div>
+      <div id="queue"></div>
     </div>
-    <div class="text-center">
-      <button class="circle-btn" id="btnClimb" type="button"></button>
-      <div class="btn-label">PANJAT</div>
+    <div class="btn-row">
+      <div class="text-center">
+        <button class="circle-btn" id="btnAvoid" type="button" disabled></button>
+        <div class="btn-label">MENGHINDAR</div>
+      </div>
+      <div class="text-center">
+        <button class="circle-btn" id="btnClimb" type="button"></button>
+        <div class="btn-label">PANJAT</div>
+      </div>
     </div>
   </div>
-</div>
+</main>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>

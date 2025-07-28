@@ -24,121 +24,174 @@
     transform: translateY(-2px);
   }
 
-  .avatar-wrapper {
-    width: 48px;
-    height: 48px;
-    min-width: 40px;
-    min-height: 40px;
-    max-width: 56px;
-    max-height: 56px;
-    overflow: hidden;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    filter: grayscale(100%);
-    transition: all 0.3s ease;
+  .avatar-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
   }
 
-  .avatar-radio:checked ~ .avatar-wrapper {
-    filter: none;
-    border-color: #f9d857;
+  .avatar-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .avatar-card.selected {
+    border: 3px solid #f9d857;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+  }
+
+  .gender-btn.active {
+    background-color: #ffc107;
+    color: #000;
+    border: none;
+  }
+
+  .section-title {
+    font-weight: 600;
+    font-size: 18px;
+  }
+
+  .section-label {
+    text-align: center;
+    background-color: #ffde74;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 14px;
+    margin-bottom: 15px;
+    font-weight: 500;
+    color: #222;
+  }
+
+  .avatars {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .avatar-card {
+    background-color: white;
+    border-radius: 20px;
+    padding: 10px;
+    width: 100%;
+    max-width: 140px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .avatar-card:hover {
+    transform: translateY(-5px);
   }
 
   .avatar-img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .avatar-option .avatar-wrapper {
-    filter: grayscale(100%);
-    border: 2px solid transparent;
-    transition: all 0.3s;
-  }
-
-  .avatar-wrapper.selected {
-    filter: none;
-    border-color: #f9d857;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
-  }
-
-  .avatar-option {
-    margin: 0 10px;
-    flex: 0 0 auto;
-  }
-
-  .card-body.d-flex {
-    flex-wrap: nowrap !important;
-    overflow-x: auto;
-    justify-content: flex-start;
-    gap: 12px;
-    padding-bottom: 8px;
-  }
-
-  .logo-center {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 32px;
-    margin-bottom: 24px;
-  }
-
-  .logo-img {
-    width: 80px;
     height: auto;
-    display: block;
+  }
+
+  .gender-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 25px;
+  }
+
+  .gender-btn {
+    border: none;
+    border-radius: 20px;
+    padding: 10px 16px;
+    font-weight: bold;
+    font-size: 14px;
+    flex: 1;
+    cursor: pointer;
+    background-color: white;
+    color: #222;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .gender-btn.active {
+    background-color: #ffffff;
+    border: 2px solid #4f46e5;
+    color: #4f46e5;
+  }
+
+  input[type="radio"] {
+    display: none;
+  }
+
+  .avatar-card img.grayscale {
+    filter: grayscale(100%);
+    transition: filter 0.3s ease;
+  }
+
+  .avatar-card input[type="radio"]:checked + img {
+    filter: none !important;
   }
 </style>
 
-<main class="d-flex justify-content-center align-items-center min-vh-100">
+<main class="d-flex justify-content-center align-items-center mt-5">
   <div class="px-4 text-center" style="max-width: 400px; width: 100%">
-    <div class="logo-center">
-      <img src="/assets/img/logo-maju-hardware.png" alt="MAJUHARDWARE Logo" class="logo-img" />
-    </div>
-
     <p class="mb-4" style="font-family: 'Lexend', sans-serif; font-size: 25px; color: #000000; font-weight: bold">
-      ISI DATA DIRI SEBELUM
-      <br />
+      ISI DATA DIRI SEBELUM <br />
       MEMULAI PERMAINAN.
     </p>
 
     <form action="/tutor" method="POST">
-      <div class="d-flex justify-content-center" style="margin-bottom: 0">
-        <div class="px-4 py-2 text-dark" style="background-color: #ffde74; border-radius: 20px; font-size: 16px; color: #454545; font-family: 'Lexend', sans-serif; margin-bottom: -20px; position: relative; z-index: 2">
-          Pilih Karaktermu!
+
+      <div id="dataDiriSection">
+        <div class="form-floating mb-3 shadow-soft">
+          <input type="text" class="form-control rounded-4" name="name" placeholder="Nama Karakter" required />
+          <label>Nama Karakter</label>
+        </div>
+        <div class="form-floating mb-3 shadow-soft">
+          <input type="text" class="form-control rounded-4" name="namalengkap" placeholder="Nama lengkap" required />
+          <label>Nama Lengkap</label>
+        </div>
+        <div class="form-floating mb-3 shadow-soft">
+          <input type="number" class="form-control rounded-4" name="notlp" placeholder="Nomor HP" required />
+          <label>Nomor HP</label>
+        </div>
+        <div class="form-floating mb-4 shadow-soft">
+          <input type="text" class="form-control rounded-4" name="ig" placeholder="Instagram" required />
+          <label>Instagram</label>
+        </div>
+        <div class="text-center mt-4">
+          <button type="button" id="nextStep" class="custom-btn">Lanjut</button>
         </div>
       </div>
 
-      <div class="card mb-3 shadow-lg" style="border-radius: 20px; background-color: white; height: 100px">
-        <div class="card-body d-flex justify-content-between align-items-center gap-2">
-          <% const avatars=['1.png', '2.png' , '3.png' , '4.png' ]; %> <% avatars.forEach((avatar, index)=> { %>
-          <label class="avatar-option text-center position-relative">
-            <input type="radio" name="avatar" value="<%= avatar %>" class="d-none avatar-radio" <%=index===0 ? 'checked' : '' %> />
-            <div class="avatar-wrapper mx-auto">
-              <img src="/assets/img/avatar/<%= avatar %>" alt="Avatar <%= index + 1 %>" class="avatar-img rounded-circle" />
-            </div>
+      <div id="genderAvatarSection" style="display: none">
+        <div class="section-label">Pilih Karakter</div>
+        <!-- GENDER SELECTION -->
+        <div class="avatars" id="avatarContainer">
+          <!-- Avatar Male (Default) -->
+          <label class="avatar-card">
+            <input type="radio" name="avatar" value="male1.png" checked />
+            <img src="/assets/img/avatar/male1.png" class="avatar-img" alt="Male Avatar 1" />
           </label>
-          <% }) %>
+          <label class="avatar-card">
+            <input type="radio" name="avatar" value="male2.png" />
+            <img src="/assets/img/avatar/male2.png" class="avatar-img" alt="Male Avatar 2" />
+          </label>
+        </div>
+
+        <!-- Section: Pilih Gender -->
+        <div class="section-label">Pilih Jenis Kelamin</div>
+
+        <div class="gender-buttons">
+          <button type="button" class="gender-btn active" id="btnMale">♂️ Laki-Laki</button>
+          <button type="button" class="gender-btn" id="btnFemale">♀️ Perempuan</button>
+        </div>
+
+        <!-- SUBMIT BUTTON -->
+        <div class="text-center mt-4">
+          <button type="submit" class="custom-btn">Daftar</button>
         </div>
       </div>
-      <div class="form-floating mb-3 shadow-soft">
-        <input type="text" class="form-control rounded-4" id="name" placeholder="Nama Karakter" name="name" required />
-        <label for="karakter">Nama Karakter</label>
-      </div>
-      <div class="form-floating mb-3 shadow-soft">
-        <input type="text" class="form-control rounded-4" id="namalengkap" placeholder="Nama lengkap" name="namalengkap" required />
-        <label for="name">Nama lengkap</label>
-      </div>
-      <div class="form-floating mb-3 shadow-soft">
-        <input type="number" class="form-control rounded-4" id="notlp" placeholder="Nomor HP" name="notlp" required />
-        <label for="notlp">Nomor HP</label>
-      </div>
-      <div class="form-floating mb-4 shadow-soft">
-        <input type="text" class="form-control rounded-4" id="ig" placeholder="Instagram" name="ig" required />
-        <label for="ig">Akun Instagram</label>
-      </div>
-
-      <button type="submit" class="custom-btn">Daftar</button>
     </form>
   </div>
 </main>
@@ -146,16 +199,73 @@
 <%- include('../partials/clients/footer') %>
 
 <script>
-  document.querySelectorAll(".avatar-radio").forEach((radio) => {
-    radio.addEventListener("change", function () {
-      document.querySelectorAll(".avatar-wrapper").forEach((w) => w.classList.remove("selected"));
-      if (this.checked) {
-        this.nextElementSibling.classList.add("selected");
+  document.getElementById("nextStep").addEventListener("click", function () {
+    document.getElementById("dataDiriSection").style.display = "none";
+    document.getElementById("genderAvatarSection").style.display = "block";
+  });
+  
+  const btnMale = document.getElementById("btnMale");
+  const btnFemale = document.getElementById("btnFemale");
+  const avatarContainer = document.getElementById("avatarContainer");
+
+  const maleAvatars = [
+    { src: "/assets/img/avatar/male1.png", value: "male1.png" },
+    { src: "/assets/img/avatar/male2.png", value: "male2.png" },
+  ];
+
+  const femaleAvatars = [
+    { src: "/assets/img/avatar/female1.png", value: "female1.png" },
+    { src: "/assets/img/avatar/female2.png", value: "female2.png" },
+  ];
+
+  function renderAvatars(avatars) {
+    avatarContainer.innerHTML = "";
+    avatars.forEach((avatar, index) => {
+      const label = document.createElement("label");
+      label.classList.add("avatar-card");
+      label.innerHTML = `
+      <input type="radio" name="avatar" value="${avatar.value}" ${index === 0 ? "checked" : ""}/>
+      <img src="${avatar.src}" class="avatar-img grayscale" alt="Avatar ${index + 1}">
+    `;
+      avatarContainer.appendChild(label);
+    });
+
+    setRadioEventListener(); // Tambahkan ini agar avatar update grayscale saat dipilih
+  }
+
+  function setRadioEventListener() {
+    const allAvatars = avatarContainer.querySelectorAll(".avatar-card");
+    allAvatars.forEach((label) => {
+      const radio = label.querySelector('input[type="radio"]');
+      const img = label.querySelector("img");
+
+      radio.addEventListener("change", () => {
+        allAvatars.forEach((otherLabel) => {
+          const otherImg = otherLabel.querySelector("img");
+          otherImg.classList.add("grayscale");
+        });
+        img.classList.remove("grayscale");
+      });
+
+      // Inisialisasi awal: hanya satu yang aktif
+      if (radio.checked) {
+        img.classList.remove("grayscale");
       }
     });
-    // Initial state
-    if (radio.checked) {
-      radio.nextElementSibling.classList.add("selected");
-    }
+  }
+
+  btnMale.addEventListener("click", () => {
+    btnMale.classList.add("active");
+    btnFemale.classList.remove("active");
+    renderAvatars(maleAvatars);
   });
+
+  btnFemale.addEventListener("click", () => {
+    btnFemale.classList.add("active");
+    btnMale.classList.remove("active");
+    renderAvatars(femaleAvatars);
+  });
+
+  // Initialize with male avatars
+  renderAvatars(maleAvatars);
 </script>

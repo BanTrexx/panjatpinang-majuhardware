@@ -179,7 +179,7 @@
   function startCountdown() {
     gameStatus = "countdown";
     emitGameStatus();
-    let count = 60;
+    let count = 5;
     socket.emit("countdown", count);
     countdownTimer = setInterval(() => {
       count--;
