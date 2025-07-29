@@ -58,16 +58,37 @@
   }
 
   .score-card {
+    display: flex;
+    align-items: center; /* Vertikal tengah */
+    justify-content: center; /* Horizontal tengah */
     background: #fff;
     border-radius: 20px;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
-    padding: 24px 18px 18px 18px;
     margin-bottom: 32px;
     width: 100%;
-    max-width: 370px;
+    max-width: 338px;
+    height: 125.76px;
     text-align: center;
-    color: #888;
     position: relative;
+    padding: 0;
+  }
+
+  #score-point {
+    font-family: "Lexend", Arial, sans-serif;
+    font-weight: 700;
+    font-style: normal;
+    font-size: 80px;
+    line-height: 1;
+    letter-spacing: 0.16px;
+    text-align: center;
+    color: #e06800;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
   }
 
   .timer-row {
@@ -151,6 +172,11 @@
     box-sizing: border-box;
   }
 
+  #skor-permainan,
+  .score-card {
+    transition: opacity 0.3s;
+  }
+
   @media (max-width: 500px) {
     .status-card {
       padding: 14px 4vw 10px 4vw;
@@ -165,6 +191,7 @@
 
 <main class="d-flex justify-content-center align-items-start min-vh-100 mt-5">
   <div class="px-4 text-center" style="max-width: 400px; width: 100%">
+    <div class="player-name-card"><%= nama %></div>
     <div id="skor-permainan">
       <div class="d-flex justify-content-center" style="margin-bottom: 0">
         <div
@@ -187,7 +214,6 @@
     <div class="score-card">
       <div id="score-point"></div>
     </div>
-    <div class="player-name-card"><%= nama %></div>
     <% if (avatar) { %>
     <img
       src="/assets/img/avatar/<%= avatar %>"
@@ -203,7 +229,7 @@
       <div id="queue"></div>
     </div>
 
-    <div class="btn-row">
+    <div class="btn-row mt-5">
       <div class="text-center">
         <button
           class="circle-btn"
@@ -240,6 +266,7 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
   // Ambil nama player dari EJS
+  let localScore = 0;
   const playerName = "<%= nama %>";
   const socket = io({
     query: { role: "player", name: playerName },
@@ -262,6 +289,61 @@
     if (status === "playing") text = "Ayo tap secepatnya!";
     if (status === "finished") text = "Permainan selesai!";
     document.getElementById("status").innerText = text;
+
+    const btnAvoid = document.getElementById("btnAvoid");
+    const btnClimb = document.getElementById("btnClimb");
+    const skorContainer = document.getElementById("skor-permainan");
+    const scoreCard = document.querySelector(".score-card");
+    const avatarImg = document.querySelector(".avatar-big");
+    const statusCard = document.querySelector(".status-card");
+    const btnRow = document.querySelector('.btn-row');
+    const playerNameCard = document.querySelector(".player-name-card");
+
+    if (status === "waiting") {
+      btnAvoid.disabled = true;
+      btnClimb.disabled = true;
+      btnAvoid.style.opacity = "0.3";
+      btnClimb.style.opacity = "0.3";
+      skorContainer.style.visibility = "hidden";
+      skorContainer.style.opacity = "0";
+      scoreCard.style.visibility = "hidden";
+      scoreCard.style.opacity = "0";
+      statusCard.style.visibility = "visible";
+      statusCard.style.opacity = "1";
+      if (avatarImg) avatarImg.style.display = "block";
+    } else if (status === "playing") {
+      btnAvoid.disabled = false;
+      btnClimb.disabled = false;
+      btnAvoid.style.opacity = "1";
+      btnClimb.style.opacity = "1";
+      skorContainer.style.visibility = "visible";
+      skorContainer.style.opacity = "1";
+      scoreCard.style.visibility = "visible";
+      scoreCard.style.opacity = "1";
+      statusCard.style.visibility = "hidden";
+      statusCard.style.opacity = "0";
+      if (avatarImg) avatarImg.style.display = "none";
+    } else {
+      btnAvoid.disabled = false;
+      btnClimb.disabled = false;
+      btnAvoid.style.opacity = "1";
+      btnClimb.style.opacity = "1";
+      skorContainer.style.visibility = "visible";
+      skorContainer.style.opacity = "1";
+      scoreCard.style.visibility = "visible";
+      scoreCard.style.opacity = "1";
+      statusCard.style.visibility = "visible";
+      statusCard.style.opacity = "1";
+      if (avatarImg) avatarImg.style.display = "block";
+    }
+
+    if (status === "finished") {
+      if (btnRow) btnRow.style.display = "none";
+      if (playerNameCard) playerNameCard.style.display = "none";
+    } else {
+      if (btnRow) btnRow.style.display = "";
+      if (playerNameCard) playerNameCard.style.display = "";
+    }
   }
 
   function renderWinner(winnerName) {
@@ -296,8 +378,11 @@
 
   // Tap area logic
   const btnClimb = document.getElementById("btnClimb");
+  const scorePoint = document.getElementById("score-point");
   btnClimb.addEventListener("click", () => {
     if (gameStatus === "playing" && currentPlayers.includes(playerName)) {
+      localScore += 10;
+      scorePoint.innerText = localScore;
       socket.emit("playerAction");
     }
   });
@@ -360,9 +445,9 @@
     gameStatus = "finished";
     document.getElementById("score-point").innerText = score;
     updateScoreVisibility();
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 5000);
+    // setTimeout(() => {
+    //   window.location.href = "/";
+    // }, 5000);
   });
 </script>
 

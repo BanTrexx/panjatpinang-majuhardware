@@ -39,6 +39,7 @@ app.use(DisplayRoutes)
 
 let queue = [];
 let currentPlayers = [];
+let playerScores = {};
 
 function emitQueueStatus() {
   io.to('display').emit('queueStatus', {
@@ -72,13 +73,15 @@ io.on('connection', (socket) => {
       });
       io.to('display').emit('countdown', count);
     });
-    // Listen for gameFinished event from display and relay to players
     socket.on('gameFinished', (data) => {
-      currentPlayers.forEach((playerName) => {
-        io.to(playerName).emit('gameFinished', data);
-      });
-      io.to('display').emit('gameFinished', data);
+  currentPlayers.forEach((playerName) => {
+    io.to(playerName).emit('gameFinished', {
+      ...data,
+      score: playerScores[playerName] || 0 // tambahkan score untuk masing-masing player
     });
+  });
+  io.to('display').emit('gameFinished', data); // display tetap pakai data asli
+});
     // Listen for request to reset players (for next game)
     socket.on('resetPlayers', () => {
       currentPlayers = [];
@@ -111,6 +114,10 @@ io.on('connection', (socket) => {
   // Relay player action to display
   socket.on('playerAction', () => {
     if (role === 'player' && currentPlayers.includes(name)) {
+
+      playerScores[name] = (playerScores[name] || 0) + 10;
+      io.to(name).emit('scoreUpdate', playerScores[name]);
+      io.to('display').emit('scoreUpdate', { name, score: playerScores[name] });
       io.to('display').emit('playerAction', { name });
     }
   });
