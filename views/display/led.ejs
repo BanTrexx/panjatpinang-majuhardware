@@ -68,6 +68,22 @@
     left: 31%;
   }
 
+  .player-wrapper {
+    position: relative;
+    width: 100%; /* agar label ikut area video */
+  }
+
+  .player-tag {
+    position: absolute;
+    top: -30px; /* jarak di atas kepala */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: auto;
+    pointer-events: none;
+    z-index: 3;
+  }
+
   .fg {
     position: absolute;
     bottom: 0;
@@ -84,12 +100,18 @@
 
   <!-- Player 1 -->
   <div class="player player1">
-    <video id="player1vid" autoplay muted playsinline></video>
+    <div class="player-wrapper">
+      <img class="player-tag" id="p1-tag" src="/assets/char/p1.png" />
+      <video id="player1vid" autoplay muted playsinline></video>
+    </div>
   </div>
 
   <!-- Player 2 -->
   <div class="player player2">
-    <video id="player2vid" autoplay muted playsinline></video>
+    <div class="player-wrapper">
+      <img class="player-tag" id="p2-tag" src="/assets/char/p2.png" />
+      <video id="player2vid" autoplay muted playsinline></video>
+    </div>
   </div>
 
   <!-- Batang pinang (video) -->
@@ -115,6 +137,7 @@
     p1: "/assets/char/mas_ware/jump_in/IMG_0991.webm",
     p2: "/assets/char/mas_ware/jump_in/IMG_0991.webm",
     pinang: "/assets/env/item/pinang/IMG_1002.webm",
+    pinangFinish: "/assets/env/item/pinang/finish.webm",
   };
 
   // Ambil elemen video jadi variabel
@@ -208,7 +231,6 @@
     otherPlayerContainer.style.bottom = `${otherBottom - 50}px`;
 
     // 4. Player ini naik
-    // 4. Player ini naik
     const climberBottom = parseInt(window.getComputedStyle(climberContainer).bottom);
     const newClimberBottom = climberBottom + 100;
 
@@ -244,6 +266,33 @@
       }
     });
 
+    if (currentOffset <= maxOffset) {
+      console.log(`${character.toUpperCase()} telah mencapai UJUNG batang! 🎉`);
+      console.log("Mengganti video batang ke pinang-finish.webm");
+
+      // Ganti video batang ke sambungan finish
+      pinangVid.pause();
+      pinangVid.src = SRC.pinangFinish;
+      pinangVid.load(); // paksa reload
+      pinangVid.currentTime = 0;
+      pinangVid.loop = false;
+
+      pinangVid.addEventListener(
+        "loadeddata",
+        () => {
+          pinangVid.play().catch((err) => {
+            console.error("Gagal play pinangFinish:", err);
+          });
+        },
+        { once: true }
+      );
+
+      // Mainkan animasi finish pemain
+      playFinishVideo(character);
+
+      return; // Stop climbing lebih lanjut
+    }
+
     // Cek apakah offset saat ini melewati kelipatan 500
     if (Math.abs(currentOffset - lastEventOffset) >= eventInterval) {
       lastEventOffset = currentOffset;
@@ -252,9 +301,16 @@
   }
 
   function triggerRandomEvent() {
+    // Jangan spawn apa pun jika sudah mencapai ujung
+    if (currentOffset <= maxOffset) {
+      console.log("Sudah di ujung, tidak spawn event.");
+      return;
+    }
+
     const delayobstacle = Math.random() * 2000;
     setTimeout(() => {
       console.log("obstacle");
+      spawnObstacle();
     }, delayobstacle);
 
     const delaycoin = Math.random() * 5000;
@@ -278,7 +334,7 @@
     }
 
     const obstacle = document.createElement("img");
-    obstacle.src = "/assets/env/item/obstacle.png";
+    obstacle.src = "/assets/env/item/obstacle/IMG_1020.GIF";
     obstacle.className = "obstacle";
     obstacle.style.position = "absolute";
     obstacle.style.bottom = `${Math.abs(currentOffset) + 200}px`;
@@ -387,6 +443,24 @@
         setTimeout(() => {
           dodgeCooldown[character] = false;
         }, 5000);
+      },
+      { once: true }
+    );
+  }
+
+  function playFinishVideo(character) {
+    const climber = character === "p1" ? player1vid : player2vid;
+
+    climber.src = climbSrc; // Gunakan ulang animasi climbing
+    climber.loop = false; // Jangan di-loop
+    climber.currentTime = 0;
+    climber.play();
+
+    climber.addEventListener(
+      "ended",
+      () => {
+        climber.pause(); // Biarkan freeze di frame terakhir (idle)
+        console.log(`${character} sampai di puncak!`);
       },
       { once: true }
     );

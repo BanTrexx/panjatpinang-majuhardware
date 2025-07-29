@@ -1,3 +1,5 @@
+require('dotenv').config();
+const db = require('./backend/models');
 const express = require('express')
 const http = require('http')
 const { Server } = require("socket.io");
@@ -133,6 +135,8 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`)
-})
+db.sequelize.sync().then(() => {
+  server.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
+  });
+});
