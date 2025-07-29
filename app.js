@@ -17,7 +17,7 @@ const io = new Server(server, {
   },
 });
 
-const PORT = 3000
+const PORT = 4000
 
 app.use(session({
   secret: 'rahasia_aman',
