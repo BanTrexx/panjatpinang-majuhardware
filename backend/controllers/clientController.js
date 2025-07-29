@@ -3,19 +3,19 @@ const path = require('path');
 
 const dataFile = path.join(process.cwd(), 'data.json');
 
-export const index = (req, res) => {
+const index = (req, res) => {
   res.render("clients/index", { title: "Clients" });
 };
-export const home = (req, res) => {
+const home = (req, res) => {
   res.render("clients/form", { title: "Clients" });
 };
 
-export const tutor = (req, res) => {
+const tutor = (req, res) => {
   req.session.playerData = req.body;
   res.render("clients/tutorial", { title: "Clients" });
 };
 
-export const games = (req, res) => {
+const games = (req, res) => {
   console.log(req.session);
   const { name, avatar, namalengkap, notlp, ig } = req.session.playerData || {};
   if (!name || !namalengkap || !notlp || !ig || !avatar) {
@@ -31,7 +31,7 @@ export const games = (req, res) => {
   });
 };
 
-export const playerID = (req, res) => {
+const playerID = (req, res) => {
   console.log(req.session);
   const { name, avatar, namalengkap, notlp, ig } = req.playerData;
   res.render("clients/game", {
@@ -42,4 +42,13 @@ export const playerID = (req, res) => {
     notlp,
     ig,
   });
-};    
+};
+
+
+module.exports = {
+  index,
+  home,
+  tutor,
+  games,
+  playerID,
+};
