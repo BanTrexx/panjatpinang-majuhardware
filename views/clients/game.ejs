@@ -177,6 +177,48 @@
     transition: opacity 0.3s;
   }
 
+  .btn-result {
+    display: flex;
+    gap: 16px; /* Jarak antara kedua tombol */
+  }
+
+  /* Gaya umum untuk kedua tombol */
+  .btn-kembali,
+  .btn-bagikan {
+    width: 159px;
+    height: 85px;
+    background: linear-gradient(90deg, #9f7fff 0%, #8055fe 100%);
+    border: 2px solid #ffffff33;
+    box-shadow: 0px 16px 32px rgba(0, 0, 0, 0.31);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: "Work Sans", sans-serif;
+    font-weight: 500;
+    font-size: 20px;
+    color: #ffffff;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease-out;
+  }
+
+  .btn-kembali:hover,
+  .btn-bagikan:hover {
+    transform: scale(1.02);
+  }
+
+  .icon {
+    width: 25px;
+    height: 25px;
+  }
+
+  .btn-kembali {
+    text-decoration: none;
+  }
+
   @media (max-width: 500px) {
     .status-card {
       padding: 14px 4vw 10px 4vw;
@@ -260,11 +302,37 @@
         </button>
       </div>
     </div>
+    <div class="btn-result" style="display: none">
+      <a href="/" class="btn-kembali">
+        <img src="/assets/img/Back-Arrow.png" alt="Kembali" class="icon" />
+        <span>Kembali</span>
+      </a>
+      <button class="btn-bagikan">
+        <img src="/assets/img/Share.png" alt="Bagikan" class="icon" />
+        <span>Bagikan</span>
+      </button>
+    </div>
   </div>
 </main>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
+  document.querySelector(".btn-bagikan").addEventListener("click", () => {
+    document.getElementById("sharePopup").style.display = "block";
+  });
+
+  function copyCaption() {
+    const caption = `Aku baru main game Panjat Peenang di booth Maju Hardware! 💪🎉
+Coba deh kamu juga!
+#PanjatPeenang #MajuHardwareChallenge @majuhardware`;
+
+    navigator.clipboard.writeText(caption).then(() => {
+      document.getElementById("copyMsg").style.display = "block";
+      setTimeout(() => {
+        document.getElementById("copyMsg").style.display = "none";
+      }, 2000);
+    });
+  }
   // Ambil nama player dari EJS
   let localScore = 0;
   const playerName = "<%= nama %>";
@@ -296,7 +364,7 @@
     const scoreCard = document.querySelector(".score-card");
     const avatarImg = document.querySelector(".avatar-big");
     const statusCard = document.querySelector(".status-card");
-    const btnRow = document.querySelector('.btn-row');
+    const btnRow = document.querySelector(".btn-row");
     const playerNameCard = document.querySelector(".player-name-card");
 
     if (status === "waiting") {
@@ -337,12 +405,16 @@
       if (avatarImg) avatarImg.style.display = "block";
     }
 
+    const btnResult = document.querySelector(".btn-result");
+
     if (status === "finished") {
       if (btnRow) btnRow.style.display = "none";
       if (playerNameCard) playerNameCard.style.display = "none";
+      if (btnResult) btnResult.style.display = "flex";
     } else {
       if (btnRow) btnRow.style.display = "";
       if (playerNameCard) playerNameCard.style.display = "";
+      if (btnResult) btnResult.style.display = "none";
     }
   }
 
