@@ -18,12 +18,17 @@
 
   .bg {
     position: absolute;
-    top: 0;
+    bottom: 0;
     left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     z-index: 0;
+    transition: bottom 0.5s linear;
+  }
+
+  .coin {
+    transition: bottom 0.5s linear; /* HINDARI ini kalau ingin koin langsung ikut turun */
   }
 
   .anim {
@@ -42,15 +47,17 @@
     position: absolute;
     bottom: 120px;
     z-index: 2;
+    transition: bottom 0.5s linear;
   }
 
   .player video {
     width: 1000px; /* atau ukuran yang kamu inginkan */
     height: auto;
+    object-fit: contain;
   }
 
   .player1 {
-    left: -23%;
+    left: -24%;
   }
 
   .player1 video {
@@ -58,7 +65,7 @@
   }
 
   .player2 {
-    left: 30%;
+    left: 31%;
   }
 
   .fg {
@@ -67,6 +74,7 @@
     left: 0;
     width: 100%;
     z-index: 3;
+    transition: bottom 0.5s linear;
   }
 </style>
 
@@ -85,22 +93,40 @@
   </div>
 
   <!-- Batang pinang (video) -->
-  <video src="/assets/env/item/pinang/IMG_1002.webm" class="anim" autoplay muted loop playsinline></video>
+  <video id="pinangVid" class="anim" autoplay muted playsinline></video>
 
   <!-- Foreground -->
   <img src="/assets/env/bg_fg/fg.png" class="fg" alt="Foreground" />
 </div>
 
 <script>
+  const bg = document.querySelector(".gradient-bg");
+  const bg1 = document.querySelector(".bg");
+  const fg = document.querySelector(".fg");
+  const maxOffset = -17200;
+  let currentOffset = 0;
+  let lastEventOffset = 0;
+  const eventInterval = 1000;
+
+  const climbSrc = "/assets/char/mas_ware/climb/climb.webm";
+  const dodgeSrc = "/assets/char/mas_ware/dodge/dodge.webm";
   // Variabel sumber video
   const SRC = {
     p1: "/assets/char/mas_ware/jump_in/IMG_0991.webm",
     p2: "/assets/char/mas_ware/jump_in/IMG_0991.webm",
+    pinang: "/assets/env/item/pinang/IMG_1002.webm",
   };
 
   // Ambil elemen video jadi variabel
   const player1vid = document.getElementById("player1vid");
   const player2vid = document.getElementById("player2vid");
+  const pinangVid = document.getElementById("pinangVid");
+
+  let currentObstacle = null;
+  let currentCoins = [];
+  let currentPlane = null;
+
+  triggerRandomEvent();
 
   // Helper untuk inisialisasi video
   function initVideo(el, src, { autoplay = true, muted = true, loop = false } = {}) {
@@ -117,6 +143,7 @@
   // Inisialisasi keduanya
   initVideo(player1vid, SRC.p1, { autoplay: true, muted: true, loop: false });
   initVideo(player2vid, SRC.p2, { autoplay: true, muted: true, loop: false });
+  initVideo(pinangVid, SRC.pinang, { autoplay: false, muted: true, loop: false });
 
   // Contoh kontrol lewat variabel:
   function pausePlayers() {
@@ -129,11 +156,240 @@
     player2vid.play();
   }
 
+  function pausePinang() {
+    pinangVid.pause();
+  }
+
+  function playPinang() {
+    pinangVid.play();
+  }
+
+  function changePinangVideo(newSrc) {
+    pinangVid.src = newSrc;
+    pinangVid.load();
+    pinangVid.play();
+  }
+
   // Contoh ganti source dinamis:
   function changeP1ToRunAnim() {
     player1vid.src = "/assets/char/mas_ware/run/run.webm";
     player1vid.currentTime = 0;
     player1vid.play();
+  }
+
+  let isClimbing = {
+    p1: false,
+    p2: false,
+  };
+
+  function climb(character) {
+    if (isDodging[character] || isClimbing[character]) return;
+
+    const isP1 = character === "p1";
+    const climber = isP1 ? player1vid : player2vid;
+    const climberContainer = isP1 ? document.querySelector(".player1") : document.querySelector(".player2");
+    const otherPlayerContainer = isP1 ? document.querySelector(".player2") : document.querySelector(".player1");
+
+    isClimbing[character] = true;
+
+    // 1. Ganti animasi climb
+    climber.src = climbSrc;
+    climber.loop = false;
+    climber.currentTime = 0;
+    climber.play();
+
+    // 2. Play batang pinang sekali
+    pinangVid.currentTime = 0;
+    pinangVid.loop = false;
+    pinangVid.play();
+
+    // 3. Player lain turun
+    const otherBottom = parseInt(window.getComputedStyle(otherPlayerContainer).bottom);
+    otherPlayerContainer.style.bottom = `${otherBottom - 50}px`;
+
+    // 4. Player ini naik
+    // 4. Player ini naik
+    const climberBottom = parseInt(window.getComputedStyle(climberContainer).bottom);
+    const newClimberBottom = climberBottom + 100;
+
+    if (newClimberBottom <= 720) {
+      climberContainer.style.bottom = `${newClimberBottom}px`;
+    }
+
+    // 5. Pause di akhir animasi (idle = frame terakhir)
+    climber.addEventListener(
+      "ended",
+      () => {
+        climber.pause(); // Biarkan di frame terakhir
+        isClimbing[character] = false;
+      },
+      { once: true }
+    );
+
+    currentOffset -= 100;
+
+    if (currentOffset < maxOffset) currentOffset = maxOffset;
+
+    bg.style.bottom = `${currentOffset}px`;
+    fg.style.bottom = `${currentOffset}px`;
+    bg1.style.bottom = `${currentOffset}px`;
+    document.querySelectorAll(".coin").forEach((coin) => {
+      const currentBottom = parseInt(window.getComputedStyle(coin).bottom);
+      const newBottom = currentBottom - 100; // decrease by 10px
+      coin.style.bottom = `${newBottom}px`;
+
+      if (newBottom <= 0) {
+        console.log("true");
+        coin.remove();
+      }
+    });
+
+    // Cek apakah offset saat ini melewati kelipatan 500
+    if (Math.abs(currentOffset - lastEventOffset) >= eventInterval) {
+      lastEventOffset = currentOffset;
+      triggerRandomEvent();
+    }
+  }
+
+  function triggerRandomEvent() {
+    const delayobstacle = Math.random() * 2000;
+    setTimeout(() => {
+      console.log("obstacle");
+    }, delayobstacle);
+
+    const delaycoin = Math.random() * 5000;
+    setTimeout(() => {
+      console.log("coin");
+      spawnCoins();
+    }, delaycoin);
+
+    // Delay pesawat antara 0 - 2000 ms
+    const delaypesawat = Math.random() * 2000;
+    setTimeout(() => {
+      console.log("pesawat");
+      spawnPlane();
+    }, delaypesawat);
+  }
+
+  function spawnObstacle() {
+    // Hapus obstacle lama jika ada
+    if (currentObstacle) {
+      currentObstacle.remove();
+    }
+
+    const obstacle = document.createElement("img");
+    obstacle.src = "/assets/env/item/obstacle.png";
+    obstacle.className = "obstacle";
+    obstacle.style.position = "absolute";
+    obstacle.style.bottom = `${Math.abs(currentOffset) + 200}px`;
+    obstacle.style.left = `${Math.random() * 80 + 10}%`; // acak posisi horizontal
+    obstacle.style.width = "50px";
+    obstacle.style.zIndex = 4;
+
+    document.querySelector(".scene").appendChild(obstacle);
+    currentObstacle = obstacle;
+  }
+
+  function spawnCoins() {
+    currentCoins = [];
+
+    const positions = ["15%", "75%"]; // kiri dan kanan
+
+    positions.forEach((pos) => {
+      const coin = document.createElement("img");
+      coin.src = "/assets/env/item/coin/coin.gif";
+      coin.className = "coin";
+      coin.style.position = "absolute";
+      coin.style.left = pos;
+      coin.style.bottom = `2000px`;
+      coin.style.width = "100px";
+      coin.style.zIndex = 3;
+
+      document.querySelector(".scene").appendChild(coin);
+      currentCoins.push(coin);
+    });
+  }
+
+  function spawnPlane() {
+    if (currentPlane) {
+      currentPlane.remove();
+    }
+
+    const plane = document.createElement("img");
+    plane.src = "/assets/env/item/object-bg/pesawat.png";
+    plane.className = "plane";
+    plane.style.position = "absolute";
+    plane.style.left = "-800px";
+    plane.style.bottom = `${Math.abs(currentOffset) + 500}px`;
+    plane.style.width = "700px";
+    plane.style.zIndex = 0;
+    plane.style.transition = "left 3s linear";
+
+    document.querySelector(".gradient-bg").appendChild(plane);
+    currentPlane = plane;
+
+    setTimeout(() => {
+      plane.style.left = "110%";
+    }, 100);
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "w" || e.key === "W") {
+      climb("p1");
+    } else if (e.key === "ArrowUp") {
+      climb("p2");
+    } else if (e.key === "s" || e.key === "S") {
+      dodge("p1");
+    } else if (e.key === "ArrowDown") {
+      dodge("p2");
+    }
+  });
+
+  let isDodging = {
+    p1: false,
+    p2: false,
+  };
+
+  let dodgeCooldown = {
+    p1: false,
+    p2: false,
+  };
+
+  function dodge(character) {
+    if (isDodging[character] || isClimbing[character] || dodgeCooldown[character]) {
+      console.log("cooldown");
+      return;
+    }
+
+    const isP1 = character === "p1";
+    const dodger = isP1 ? player1vid : player2vid;
+    const dodgerContainer = isP1 ? document.querySelector(".player1") : document.querySelector(".player2");
+
+    isDodging[character] = true;
+    dodgeCooldown[character] = true; // Mulai cooldown
+
+    // 1. Ganti animasi dodge
+    dodger.src = dodgeSrc;
+    dodger.loop = false;
+    dodger.currentTime = 0;
+    dodger.play();
+
+    // 2. Setelah selesai, kembali ke frame pertama climb (idle)
+    dodger.addEventListener(
+      "ended",
+      () => {
+        dodger.src = climbSrc;
+        dodger.currentTime = 0;
+        dodger.pause();
+        isDodging[character] = false;
+
+        // Reset cooldown setelah 5 detik
+        setTimeout(() => {
+          dodgeCooldown[character] = false;
+        }, 5000);
+      },
+      { once: true }
+    );
   }
 </script>
 

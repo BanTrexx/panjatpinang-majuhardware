@@ -9,13 +9,76 @@
     <style>
       body {
         margin: 0;
-      }
-      .gradient-bg {
+        overflow: hidden;
+        position: relative; /* Penting! agar .gradient-bg bisa pakai bottom */
         height: 100vh;
+      }
+
+      .gradient-bg div {
+        position: absolute;
+      }
+
+      .awan {
+        bottom: 7800px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .bumi {
+        bottom: 12800px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .meteor {
+        bottom: 14300px;
+        right: 10%;
+      }
+
+      .satelit {
+        bottom: 15800px;
+        left: 10%;
+      }
+
+      .pesawat {
+        bottom: 1500px;
+        width: 100vw;
+        height: 100px;
+        background: #000;
+        position: absolute;
+      }
+
+      .gradient-bg img {
+        width: 100vw; /* Lebar mengikuti viewport */
+        height: auto; /* Tinggi menyesuaikan agar tidak pecah */
+        display: block; /* Hindari whitespace di bawah image */
+      }
+
+      .gradient-bg {
+        height: 1000vh;
         width: 100%;
+        position: absolute;
+        bottom: 600px;
+        left: 0;
         background: linear-gradient(to bottom, #e3dfb7 0%, #6c00aa 6%, #a358fe 17%, #f85b9f 33%, #ffa451 50%, #006ddb 67%, #3c96c7 83%, #a3e4ff 100%);
+        transition: bottom 0.5s linear;
       }
     </style>
   </head>
-  <body class="gradient-bg"></body>
+  <body>
+    <div class="gradient-bg">
+      <div class="awan">
+        <img src="/assets/env/item/object-bg/awan.png" alt="" />
+      </div>
+      <div class="bumi">
+        <img src="/assets/env/item/object-bg/bumi.png" alt="" />
+      </div>
+      <div class="meteor">
+        <img src="/assets/env/item/object-bg/meteor.png" alt="" />
+      </div>
+      <div class="satelit">
+        <img src="/assets/env/item/object-bg/satelit.png" alt="" />
+      </div>
+    </div>
+  </body>
 </html>
