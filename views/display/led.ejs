@@ -68,10 +68,23 @@
     left: 31%;
   }
 
-  .player-wrapper {
-    position: relative;
-    width: 100%; /* agar label ikut area video */
-  }
+.player-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 1000px; /* samakan dengan video */
+}
+
+ .player-tag {
+  width: 100px;
+  height: auto;
+  position: absolute;
+  top: 50px; /* lebih turun dari sebelumnya */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+}
 
   .fg {
     position: absolute;
@@ -326,7 +339,7 @@
     obstacle.src = "/assets/env/item/obstacle/IMG_1020.GIF";
     obstacle.className = "obstacle";
     obstacle.style.position = "absolute";
-    obstacle.style.bottom = `${Math.abs(currentOffset) + 200}px`;
+    obstacle.style.bottom = '200px';
     obstacle.style.left = `${Math.random() * 80 + 10}%`; // acak posisi horizontal
     obstacle.style.width = "50px";
     obstacle.style.zIndex = 4;
