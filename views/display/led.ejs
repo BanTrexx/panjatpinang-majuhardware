@@ -339,7 +339,7 @@
     obstacle.src = "/assets/env/item/obstacle/IMG_1020.GIF";
     obstacle.className = "obstacle";
     obstacle.style.position = "absolute";
-    obstacle.style.bottom = '200px';
+    obstacle.style.bottom = `${Math.abs(currentOffset) + 200}px`;
     obstacle.style.left = `${Math.random() * 80 + 10}%`; // acak posisi horizontal
     obstacle.style.width = "50px";
     obstacle.style.zIndex = 4;
