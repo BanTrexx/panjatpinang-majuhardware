@@ -145,31 +145,139 @@
   .avatar-card input[type="radio"]:checked + img {
     filter: none !important;
   }
+
+  .carousel-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .carousel-track {
+    display: flex;
+    transition: transform 0.4s ease;
+    padding: 40px 0;
+    gap: -20px;
+    touch-action: pan-y;
+  }
+
+  .card {
+    flex: 0 0 auto;
+    width: 221.73px;
+    height: 221.73px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    transform: scale(0.8);
+    opacity: 0.5;
+    background: none;
+    border: none;
+    box-shadow: none;
+  }
+
+  .card.active {
+    background: rgba(255, 255, 255, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transform: scale(1);
+    opacity: 1;
+    z-index: 1;
+  }
+
+  .card img {
+    max-width: 130%;
+    max-height: 130%;
+    object-fit: contain;
+    border-radius: 20px;
+  }
+
+  .nav-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .nav-button.left {
+    left: 10px;
+  }
+
+  .nav-button.right {
+    right: 10px;
+  }
+
+  .nav-button.left,
+  .nav-button.right {
+    display: none;
+  }
 </style>
 
 <main class="d-flex justify-content-center align-items-center mt-5">
   <div class="px-4 text-center" style="max-width: 400px; width: 100%">
-    <p class="mb-4" style="font-family: 'Lexend', sans-serif; font-size: 25px; color: #000000; font-weight: bold">
+    <p
+      class="mb-4"
+      style="
+        font-family: 'Lexend', sans-serif;
+        font-size: 25px;
+        color: #000000;
+        font-weight: bold;
+      "
+    >
       ISI DATA DIRI SEBELUM <br />
       MEMULAI PERMAINAN.
     </p>
 
     <form action="/tutor" method="POST">
+      <input type="hidden" name="avatar" id="selected-character" />
       <div id="dataDiriSection">
         <div class="form-floating mb-3 shadow-soft">
-          <input type="text" class="form-control rounded-4" name="name" placeholder="Nama Karakter" required />
+          <input
+            type="text"
+            class="form-control rounded-4"
+            name="name"
+            placeholder="Nama Karakter"
+            required
+          />
           <label>Nama Karakter</label>
         </div>
         <div class="form-floating mb-3 shadow-soft">
-          <input type="text" class="form-control rounded-4" name="namalengkap" placeholder="Nama lengkap" required />
+          <input
+            type="text"
+            class="form-control rounded-4"
+            name="namalengkap"
+            placeholder="Nama lengkap"
+            required
+          />
           <label>Nama Lengkap</label>
         </div>
         <div class="form-floating mb-3 shadow-soft">
-          <input type="number" class="form-control rounded-4" name="notlp" placeholder="Nomor HP" required />
+          <input
+            type="number"
+            class="form-control rounded-4"
+            name="notlp"
+            placeholder="Nomor HP"
+            required
+          />
           <label>Nomor HP</label>
         </div>
         <div class="form-floating mb-4 shadow-soft">
-          <input type="text" class="form-control rounded-4" name="ig" placeholder="Instagram" required />
+          <input
+            type="text"
+            class="form-control rounded-4"
+            name="ig"
+            placeholder="Instagram"
+            required
+          />
           <label>Instagram</label>
         </div>
         <div class="text-center mt-4">
@@ -180,24 +288,23 @@
       <div id="genderAvatarSection" style="display: none">
         <div class="section-label">Pilih Karakter</div>
         <!-- GENDER SELECTION -->
-        <div class="avatars" id="avatarContainer">
-          <!-- Avatar Male (Default) -->
-          <label class="avatar-card">
-            <input type="radio" name="avatar" value="male1.png" checked />
-            <img src="/assets/img/avatar/male1.png" class="avatar-img" alt="Male Avatar 1" />
-          </label>
-          <label class="avatar-card">
-            <input type="radio" name="avatar" value="male2.png" />
-            <img src="/assets/img/avatar/male2.png" class="avatar-img" alt="Male Avatar 2" />
-          </label>
-        </div>
-
-        <!-- Section: Pilih Gender -->
-        <div class="section-label">Pilih Jenis Kelamin</div>
-
-        <div class="gender-buttons">
-          <button type="button" class="gender-btn active" id="btnMale">♂️ Laki-Laki</button>
-          <button type="button" class="gender-btn" id="btnFemale">♀️ Perempuan</button>
+        <div class="carousel-container">
+          <button class="nav-button left">&#8592;</button>
+          <div class="carousel-track" id="carousel">
+            <div class="card active" data-id="1">
+              <img src="/assets/img/avatar/male1.png" alt="Pak Hard" />
+            </div>
+            <div class="card" data-id="2">
+              <img src="/assets/img/avatar/female1.png" alt="Mas Ware" />
+            </div>
+            <div class="card" data-id="3">
+              <img src="/assets/img/avatar/male2.png" alt="Mbak Juma" />
+            </div>
+            <div class="card" data-id="4">
+              <img src="/assets/img/avatar/female2.png" alt="Tante Mawar" />
+            </div>
+          </div>
+          <button class="nav-button right">&#8594;</button>
         </div>
 
         <!-- SUBMIT BUTTON -->
@@ -217,68 +324,90 @@
     document.getElementById("genderAvatarSection").style.display = "block";
   });
 
-  const btnMale = document.getElementById("btnMale");
-  const btnFemale = document.getElementById("btnFemale");
   const avatarContainer = document.getElementById("avatarContainer");
 
-  const maleAvatars = [
-    { src: "/assets/img/avatar/male1.png", value: "male1.png" },
-    { src: "/assets/img/avatar/male2.png", value: "male2.png" },
-  ];
+  const track = document.getElementById("carousel");
+  const cards = track.querySelectorAll(".card");
+  const btnLeft = document.querySelector(".nav-button.left");
+  const btnRight = document.querySelector(".nav-button.right");
 
-  const femaleAvatars = [
-    { src: "/assets/img/avatar/female1.png", value: "female1.png" },
-    { src: "/assets/img/avatar/female2.png", value: "female2.png" },
-  ];
+  let activeIndex = 0;
 
-  function renderAvatars(avatars) {
-    avatarContainer.innerHTML = "";
-    avatars.forEach((avatar, index) => {
-      const label = document.createElement("label");
-      label.classList.add("avatar-card");
-      label.innerHTML = `
-      <input type="radio" name="avatar" value="${avatar.value}" ${index === 0 ? "checked" : ""}/>
-      <img src="${avatar.src}" class="avatar-img grayscale" alt="Avatar ${index + 1}">
-    `;
-      avatarContainer.appendChild(label);
+  function updateCarousel() {
+    const cardWidth = cards[0].offsetWidth + 20; // width + gap
+    const centerOffset =
+      track.parentElement.offsetWidth / 2 - cards[0].offsetWidth / 2;
+    track.style.transform = `translateX(calc(${centerOffset}px - ${
+      activeIndex * cardWidth
+    }px))`;
+
+    cards.forEach((card, index) => {
+      card.classList.toggle("active", index === activeIndex);
     });
 
-    setRadioEventListener(); // Tambahkan ini agar avatar update grayscale saat dipilih
+    const selectedCharacterInput =
+      document.getElementById("selected-character");
+    const activeCard = cards[activeIndex];
+    const img = activeCard.querySelector("img");
+    // Ambil nama file dari src
+    const src = img.getAttribute("src");
+    const filename = src.substring(src.lastIndexOf("/") + 1);
+    selectedCharacterInput.value = filename;
   }
 
-  function setRadioEventListener() {
-    const allAvatars = avatarContainer.querySelectorAll(".avatar-card");
-    allAvatars.forEach((label) => {
-      const radio = label.querySelector('input[type="radio"]');
-      const img = label.querySelector("img");
+  btnLeft.addEventListener("click", () => {
+    if (activeIndex > 0) {
+      activeIndex--;
+      updateCarousel();
+    }
+  });
 
-      radio.addEventListener("change", () => {
-        allAvatars.forEach((otherLabel) => {
-          const otherImg = otherLabel.querySelector("img");
-          otherImg.classList.add("grayscale");
-        });
-        img.classList.remove("grayscale");
-      });
+  btnRight.addEventListener("click", () => {
+    if (activeIndex < cards.length - 1) {
+      activeIndex++;
+      updateCarousel();
+    }
+  });
 
-      // Inisialisasi awal: hanya satu yang aktif
-      if (radio.checked) {
-        img.classList.remove("grayscale");
-      }
-    });
+  // Swipe support
+  let startX = 0;
+  let isDragging = false;
+
+  track.addEventListener("touchstart", (e) => {
+    startX = e.touches[0].clientX;
+    isDragging = true;
+  });
+
+  track.addEventListener("touchend", (e) => {
+    if (!isDragging) return;
+    const endX = e.changedTouches[0].clientX;
+    handleSwipe(endX - startX);
+    isDragging = false;
+  });
+
+  track.addEventListener("mousedown", (e) => {
+    startX = e.clientX;
+    isDragging = true;
+  });
+
+  track.addEventListener("mouseup", (e) => {
+    if (!isDragging) return;
+    const endX = e.clientX;
+    handleSwipe(endX - startX);
+    isDragging = false;
+  });
+
+  function handleSwipe(deltaX) {
+    const threshold = 50;
+    if (deltaX > threshold && activeIndex > 0) {
+      activeIndex--;
+      updateCarousel();
+    } else if (deltaX < -threshold && activeIndex < cards.length - 1) {
+      activeIndex++;
+      updateCarousel();
+    }
   }
 
-  btnMale.addEventListener("click", () => {
-    btnMale.classList.add("active");
-    btnFemale.classList.remove("active");
-    renderAvatars(maleAvatars);
-  });
-
-  btnFemale.addEventListener("click", () => {
-    btnFemale.classList.add("active");
-    btnMale.classList.remove("active");
-    renderAvatars(femaleAvatars);
-  });
-
-  // Initialize with male avatars
-  renderAvatars(maleAvatars);
+  window.addEventListener("load", updateCarousel);
+  window.addEventListener("resize", updateCarousel);
 </script>
