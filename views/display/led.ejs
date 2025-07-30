@@ -120,9 +120,9 @@
   <video id="pinangVid" class="anim" autoplay muted playsinline></video>
 
   <div id="winner-section" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 999; pointer-events: none">
-    <img id="winner-image" src="" style="width: 200px; height: auto" />
+    <img id="winner-image" src="" />
     <div>
-      <img src="/assets/img/confetti.GIF" style="width: 300px; margin-top: 20px" />
+      <img src="/assets/img/confetti.GIF" />
     </div>
   </div>
 
@@ -145,19 +145,6 @@
   let winner = null;
   let queue = [];
   let countdownTimer = null;
-
-  socket.on("playerClimb", ({ name }) => {
-    // Map nama pemain ke karakter: p1 atau p2
-    const character = name === currentPlayers[0] ? "p1" : name === currentPlayers[1] ? "p2" : null;
-    if (!character) return;
-
-    climb(character); // Jalankan climb animasi dan logic
-  });
-
-  socket.on("playerDodge", ({ name }) => {
-    const character = name === currentPlayers[0] ? "p1" : name === currentPlayers[1] ? "p2" : null;
-    if (character) dodge(character);
-  });
 
   function startGame() {
     gameStatus = "playing";
@@ -182,6 +169,16 @@
     }, 1000);
   }
 
+  function emitGameStatus() {
+    socket.emit("gameStatusUpdate", {
+      gameStatus,
+      currentPlayers,
+      playersProgress,
+      winner,
+      queueLength: queue.length,
+    });
+  }
+
   socket.on("newPlayers", ({ currentPlayers: players }) => {
     currentPlayers = players;
     console.log(">> Pemain aktif baru:", currentPlayers);
@@ -192,15 +189,18 @@
     }
   });
 
-  function emitGameStatus() {
-    socket.emit("gameStatusUpdate", {
-      gameStatus,
-      currentPlayers,
-      playersProgress,
-      winner,
-      queueLength: queue.length,
-    });
-  }
+  socket.on("playerClimb", ({ name }) => {
+    // Map nama pemain ke karakter: p1 atau p2
+    const character = name === currentPlayers[0] ? "p1" : name === currentPlayers[1] ? "p2" : null;
+    if (!character) return;
+
+    climb(character); // Jalankan climb animasi dan logic
+  });
+
+  socket.on("playerDodge", ({ name }) => {
+    const character = name === currentPlayers[0] ? "p1" : name === currentPlayers[1] ? "p2" : null;
+    if (character) dodge(character);
+  });
 
   socket.on("gameStatusUpdate", ({ gameStatus: status, currentPlayers: players, winner: win, queueLength: ql }) => {
     gameStatus = status;
@@ -220,7 +220,7 @@
   const bg = document.querySelector(".gradient-bg");
   const bg1 = document.querySelector(".bg");
   const fg = document.querySelector(".fg");
-  const maxOffset = -10200;
+  const maxOffset = -17200;
   let currentOffset = 0;
   let lastEventOffset = 0;
   const eventInterval = 1000;
@@ -243,6 +243,7 @@
   let currentObstacles = [];
   let currentCoins = [];
   let currentPlane = null;
+  let currentBird = null;
 
   triggerRandomEvent();
 
@@ -480,6 +481,9 @@
       console.log("pesawat");
       spawnPlane();
     }, delaypesawat);
+
+    const delaybird = Math.random() * 3000;
+    setTimeout(() => spawnBird(), delaybird);
   }
 
   function spawnObstacle() {
@@ -489,7 +493,7 @@
     obstacle.style.position = "absolute";
     obstacle.style.bottom = `${Math.abs(currentOffset) + 200}px`;
     obstacle.style.left = `${Math.random() * 80 + 10}%`;
-    obstacle.style.width = "500px";
+    obstacle.style.width = "350px";
     obstacle.style.zIndex = 4;
 
     document.querySelector(".scene").appendChild(obstacle);
@@ -538,6 +542,36 @@
     setTimeout(() => {
       plane.style.left = "110%";
     }, 100);
+  }
+
+  function spawnBird() {
+    if (currentBird) {
+      currentBird.remove();
+    }
+
+    const bird = document.createElement("img");
+    bird.src = "/assets/env/item/object-bg/manuk.GIF"; // Pastikan file ada
+    bird.className = "bird";
+    bird.style.position = "absolute";
+    bird.style.left = "-400px"; // Mulai dari luar kiri layar
+    bird.style.bottom = `${Math.abs(currentOffset) + 600}px`;
+    bird.style.width = "700px";
+    bird.style.zIndex = 4;
+    bird.style.transition = "left 4s linear";
+
+    document.querySelector(".gradient-bg")?.appendChild(bird);
+    currentBird = bird;
+
+    // Mulai gerakan setelah satu frame render
+    setTimeout(() => {
+      bird.style.left = "110%"; // Terbang ke kanan
+    }, 100);
+
+    // Hapus setelah animasi selesai
+    setTimeout(() => {
+      bird.remove();
+      currentBird = null;
+    }, 5000);
   }
 
   document.addEventListener("keydown", (e) => {
