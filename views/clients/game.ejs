@@ -234,34 +234,16 @@
 <main class="d-flex justify-content-center align-items-start min-vh-100 mt-5">
   <div class="px-4 text-center" style="max-width: 400px; width: 100%">
     <div class="player-name-card"><%= nama %></div>
-    <div id="skor-permainan">
+    <div id="skor-permainan" style="display: none">
       <div class="d-flex justify-content-center" style="margin-bottom: 0">
-        <div
-          class="px-4 py-2 text-dark"
-          style="
-            background-color: #f9d857;
-            border-radius: 20px;
-            font-size: 16px;
-            color: #454545;
-            font-family: 'Lexend', sans-serif;
-            margin-bottom: -20px;
-            position: relative;
-            z-index: 2;
-          "
-        >
-          Skor Permainan
-        </div>
+        <div class="px-4 py-2 text-dark" style="background-color: #f9d857; border-radius: 20px; font-size: 16px; color: #454545; font-family: 'Lexend', sans-serif; margin-bottom: -20px; position: relative; z-index: 2">Skor Permainan</div>
       </div>
     </div>
-    <div class="score-card">
+    <div class="score-card" style="display: none">
       <div id="score-point"></div>
     </div>
     <% if (avatar) { %>
-    <img
-      src="/assets/img/avatar/<%= avatar %>"
-      alt="Avatar"
-      class="avatar-big"
-    />
+    <img src="/assets/img/avatar/<%= avatar %>" alt="Avatar" class="avatar-big" />
     <% } %>
 
     <div class="status-card">
@@ -273,32 +255,13 @@
 
     <div class="btn-row mt-5">
       <div class="text-center">
-        <button
-          class="circle-btn"
-          id="btnAvoid"
-          type="button"
-          disabled
-          style="padding: 0; background: none; box-shadow: none; border: none"
-        >
-          <img
-            src="/assets/img/Hindar.png"
-            alt="Hindar"
-            style="width: 158px; height: 158px; object-fit: contain"
-          />
+        <button class="circle-btn" id="btnAvoid" type="button" disabled style="padding: 0; background: none; box-shadow: none; border: none">
+          <img src="/assets/img/Hindar.png" alt="Hindar" style="width: 158px; height: 158px; object-fit: contain" />
         </button>
       </div>
       <div class="text-center">
-        <button
-          class="circle-btn"
-          id="btnClimb"
-          type="button"
-          style="padding: 0; background: none; box-shadow: none; border: none"
-        >
-          <img
-            src="/assets/img/Panjat.png"
-            alt="Panjat"
-            style="width: 158px; height: 158px; object-fit: contain"
-          />
+        <button class="circle-btn" id="btnClimb" type="button" style="padding: 0; background: none; box-shadow: none; border: none">
+          <img src="/assets/img/Panjat.png" alt="Panjat" style="width: 158px; height: 158px; object-fit: contain" />
         </button>
       </div>
     </div>
@@ -351,8 +314,7 @@ Coba deh kamu juga!
 
   function renderStatus(status) {
     let text = "";
-    if (status === "waiting")
-      text = "Tunggu pemain lain menyelesaikan permainannya dalam waktu";
+    if (status === "waiting") text = "Tunggu pemain lain menyelesaikan permainannya dalam waktu";
     if (status === "countdown") text = "Countdown dimulai!";
     if (status === "playing") text = "Ayo tap secepatnya!";
     if (status === "finished") text = "Permainan selesai!";
@@ -435,11 +397,7 @@ Coba deh kamu juga!
   function renderQueue() {
     const queueDiv = document.getElementById("queue");
     // Tampilkan antrian hanya jika user sedang menunggu giliran dan gameStatus 'playing'
-    if (
-      gameStatus === "playing" &&
-      !currentPlayers.includes(playerName) &&
-      queueLength > 0
-    ) {
+    if (gameStatus === "playing" && !currentPlayers.includes(playerName) && queueLength > 0) {
       queueDiv.style.display = "block";
       queueDiv.innerText = `Menunggu giliran... Antrian pemain: ${queueLength}`;
     } else {
@@ -463,10 +421,7 @@ Coba deh kamu juga!
     const skorContainer = document.getElementById("skor-permainan");
     const scoreCard = document.querySelector(".score-card");
 
-    if (
-      (gameStatus === "playing" && currentPlayers.includes(playerName)) ||
-      gameStatus === "finished"
-    ) {
+    if ((gameStatus === "playing" && currentPlayers.includes(playerName)) || gameStatus === "finished") {
       skorContainer.style.display = "block";
       scoreCard.style.display = "block";
     } else {
@@ -480,35 +435,26 @@ Coba deh kamu juga!
   });
 
   // --- Only listen for updates from app.js (relayed from display) ---
-  socket.on(
-    "gameStatusUpdate",
-    ({
-      gameStatus: status,
-      currentPlayers: players,
-      winner: win,
-      queueLength: ql,
-    }) => {
-      gameStatus = status;
-      currentPlayers = players;
-      winner = win;
-      queueLength = ql;
-      renderStatus(status);
-      renderWinner(win);
-      renderQueue();
-      updateScoreVisibility();
+  socket.on("gameStatusUpdate", ({ gameStatus: status, currentPlayers: players, winner: win, queueLength: ql }) => {
+    gameStatus = status;
+    currentPlayers = players;
+    winner = win;
+    queueLength = ql;
+    renderStatus(status);
+    renderWinner(win);
+    renderQueue();
+    updateScoreVisibility();
 
-      if (status !== "countdown") {
-        document.getElementById("countdown").innerText = "";
-      }
-      if (status !== "finished") {
-        document.getElementById("winner").innerText = "";
-      }
+    if (status !== "countdown") {
+      document.getElementById("countdown").innerText = "";
     }
-  );
+    if (status !== "finished") {
+      document.getElementById("winner").innerText = "";
+    }
+  });
 
   socket.on("countdown", (count) => {
-    document.getElementById("countdown").innerText =
-      count > 0 ? `${count}` : "";
+    document.getElementById("countdown").innerText = count > 0 ? `${count}` : "";
   });
 
   socket.on("gameFinished", ({ winner: win, score }) => {
