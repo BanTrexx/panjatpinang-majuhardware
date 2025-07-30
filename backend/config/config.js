@@ -18,18 +18,16 @@ module.exports = {
     dialect: 'postgres'
   },
   production: {
-    username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 5432,
-    dialect: 'postgres',
-    dialectOptions: {
-      ssl: process.env.DB_SSL === 'true' ? {
-        require: true,
-        rejectUnauthorized: false
-      } : false
-    },
-    logging: false
-  }
+  username: process.env.DB_USERNAME || 'majuuser',
+  password: process.env.DB_PASSWORD || 'postgres',
+  database: process.env.DB_NAME || 'majudb',
+  host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT || 5432,
+  dialect: 'postgres',
+  dialectOptions: {
+    ssl: false
+  },
+  logging: false
+}
+
 };
