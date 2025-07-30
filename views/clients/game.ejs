@@ -256,12 +256,12 @@
     <div class="btn-row mt-5">
       <div class="text-center">
         <button class="circle-btn" id="btnAvoid" type="button" disabled style="padding: 0; background: none; box-shadow: none; border: none">
-          <img src="/assets/img/Hindar.png" alt="Hindar" style="width: 158px; height: 158px; object-fit: contain" />
+          <img id="imgAvoid" src="/assets/img/hindar.png" alt="Hindar" style="width: 158px; height: 158px; object-fit: contain" />
         </button>
       </div>
       <div class="text-center">
         <button class="circle-btn" id="btnClimb" type="button" style="padding: 0; background: none; box-shadow: none; border: none">
-          <img src="/assets/img/Panjat.png" alt="Panjat" style="width: 158px; height: 158px; object-fit: contain" />
+          <img id="imgClimb" src="/assets/img/panjat.png" alt="Panjat" style="width: 158px; height: 158px; object-fit: contain" />
         </button>
       </div>
     </div>
@@ -413,7 +413,15 @@ Coba deh kamu juga!
     if (gameStatus === "playing" && currentPlayers.includes(playerName)) {
       localScore += 10;
       scorePoint.innerText = localScore;
-      socket.emit("playerAction");
+      socket.emit("playerClimb");
+    }
+  });
+
+  const btnAvoid = document.getElementById("btnAvoid");
+  btnAvoid.addEventListener("click", () => {
+    if (gameStatus === "playing" && currentPlayers.includes(playerName)) {
+      localScore += 10;
+      socket.emit("playerDodge");
     }
   });
 
@@ -466,6 +474,43 @@ Coba deh kamu juga!
     // setTimeout(() => {
     //   window.location.href = "/";
     // }, 5000);
+  });
+
+  const imgAvoid = document.getElementById("imgAvoid");
+  const imgClimb = document.getElementById("imgClimb");
+
+  btnAvoid.addEventListener("mousedown", () => {
+    imgAvoid.src = "/assets/img/hindar_press.png";
+  });
+  btnAvoid.addEventListener("mouseup", () => {
+    imgAvoid.src = "/assets/img/hindar.png";
+  });
+  btnAvoid.addEventListener("mouseleave", () => {
+    imgAvoid.src = "/assets/img/hindar.png";
+  });
+
+  btnClimb.addEventListener("mousedown", () => {
+    imgClimb.src = "/assets/img/panjat_press.png";
+  });
+  btnClimb.addEventListener("mouseup", () => {
+    imgClimb.src = "/assets/img/panjat.png";
+  });
+  btnClimb.addEventListener("mouseleave", () => {
+    imgClimb.src = "/assets/img/panjat.png";
+  });
+
+  btnAvoid.addEventListener("touchstart", () => {
+    imgAvoid.src = "/assets/img/hindar_press.png";
+  });
+  btnAvoid.addEventListener("touchend", () => {
+    imgAvoid.src = "/assets/img/hindar.png";
+  });
+
+  btnClimb.addEventListener("touchstart", () => {
+    imgClimb.src = "/assets/img/panjat_press.png";
+  });
+  btnClimb.addEventListener("touchend", () => {
+    imgClimb.src = "/assets/img/panjat.png";
   });
 </script>
 

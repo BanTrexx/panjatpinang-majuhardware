@@ -68,23 +68,23 @@
     left: 31%;
   }
 
-.player-wrapper {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 1000px; /* samakan dengan video */
-}
+  .player-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 1000px; /* samakan dengan video */
+  }
 
- .player-tag {
-  width: 100px;
-  height: auto;
-  position: absolute;
-  top: 50px; /* lebih turun dari sebelumnya */
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 5;
-}
+  .player-tag {
+    width: 100px;
+    height: auto;
+    position: absolute;
+    top: 50px; /* lebih turun dari sebelumnya */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+  }
 
   .fg {
     position: absolute;
@@ -119,15 +119,108 @@
   <!-- Batang pinang (video) -->
   <video id="pinangVid" class="anim" autoplay muted playsinline></video>
 
+  <div id="winner-section" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 999; pointer-events: none">
+    <img id="winner-image" src="" style="width: 200px; height: auto" />
+    <div>
+      <img src="/assets/img/confetti.GIF" style="width: 300px; margin-top: 20px" />
+    </div>
+  </div>
+
   <!-- Foreground -->
   <img src="/assets/env/bg_fg/fg.png" class="fg" alt="Foreground" />
 </div>
 
+<script src="/socket.io/socket.io.js"></script>
 <script>
+  const socket = io({
+    query: { role: "display", name: "display" },
+  });
+
+  let currentPlayers = [];
+  let playersProgress = {
+    p1: { dom: document.getElementById("p1"), offset: 0 },
+    p2: { dom: document.getElementById("p2"), offset: 0 },
+  };
+  let gameStatus = "waiting";
+  let winner = null;
+  let queue = [];
+  let countdownTimer = null;
+
+  socket.on("playerClimb", ({ name }) => {
+    // Map nama pemain ke karakter: p1 atau p2
+    const character = name === currentPlayers[0] ? "p1" : name === currentPlayers[1] ? "p2" : null;
+    if (!character) return;
+
+    climb(character); // Jalankan climb animasi dan logic
+  });
+
+  socket.on("playerDodge", ({ name }) => {
+    const character = name === currentPlayers[0] ? "p1" : name === currentPlayers[1] ? "p2" : null;
+    if (character) dodge(character);
+  });
+
+  function startGame() {
+    gameStatus = "playing";
+    playersProgress[currentPlayers[0]] = 0;
+    playersProgress[currentPlayers[1]] = 0;
+    winner = null;
+    emitGameStatus();
+  }
+
+  function startCountdown() {
+    gameStatus = "countdown";
+    emitGameStatus();
+    let count = 5;
+    socket.emit("countdown", count);
+    countdownTimer = setInterval(() => {
+      count--;
+      socket.emit("countdown", count);
+      if (count === 0) {
+        clearInterval(countdownTimer);
+        startGame();
+      }
+    }, 1000);
+  }
+
+  socket.on("newPlayers", ({ currentPlayers: players }) => {
+    currentPlayers = players;
+    console.log(">> Pemain aktif baru:", currentPlayers);
+    if (currentPlayers.length === 2 && gameStatus === "waiting") {
+      startCountdown();
+    } else {
+      emitGameStatus();
+    }
+  });
+
+  function emitGameStatus() {
+    socket.emit("gameStatusUpdate", {
+      gameStatus,
+      currentPlayers,
+      playersProgress,
+      winner,
+      queueLength: queue.length,
+    });
+  }
+
+  socket.on("gameStatusUpdate", ({ gameStatus: status, currentPlayers: players, winner: win, queueLength: ql }) => {
+    gameStatus = status;
+    currentPlayers = players;
+    winner = win;
+    queue = ql;
+    console.log(">> Status game update:", { gameStatus, currentPlayers, winner, queue });
+
+    if (gameStatus === "finished" && winner) {
+      const winnerSection = document.getElementById("winner-section");
+      const winnerImage = document.getElementById("winner-image");
+      winnerImage.src = "/assets/img/winner.png";
+      winnerSection.style.display = "block";
+    }
+  });
+
   const bg = document.querySelector(".gradient-bg");
   const bg1 = document.querySelector(".bg");
   const fg = document.querySelector(".fg");
-  const maxOffset = -17200;
+  const maxOffset = -10200;
   let currentOffset = 0;
   let lastEventOffset = 0;
   const eventInterval = 1000;
@@ -147,7 +240,7 @@
   const player2vid = document.getElementById("player2vid");
   const pinangVid = document.getElementById("pinangVid");
 
-  let currentObstacle = null;
+  let currentObstacles = [];
   let currentCoins = [];
   let currentPlane = null;
 
@@ -268,14 +361,25 @@
       }
     });
 
+    currentObstacles.forEach((obstacle, i) => {
+      const currentBottom = parseInt(window.getComputedStyle(obstacle).bottom);
+      const newBottom = currentBottom - 100;
+      obstacle.style.bottom = `${newBottom}px`;
+
+      if (newBottom <= 0) {
+        obstacle.remove();
+        currentObstacles.splice(i, 1);
+      }
+    });
+
     if (currentOffset <= maxOffset) {
       console.log(`${character.toUpperCase()} telah mencapai UJUNG batang! 🎉`);
       console.log("Mengganti video batang ke pinang-finish.webm");
 
-      // Ganti video batang ke sambungan finish
+      // Ganti video batang
       pinangVid.pause();
       pinangVid.src = SRC.pinangFinish;
-      pinangVid.load(); // paksa reload
+      pinangVid.load();
       pinangVid.currentTime = 0;
       pinangVid.loop = false;
 
@@ -289,8 +393,22 @@
         { once: true }
       );
 
-      // Mainkan animasi finish pemain
+      // Animasi finish pemain
       playFinishVideo(character);
+
+      if (gameStatus === "playing") {
+        winner = character === "p1" ? currentPlayers[0] : currentPlayers[1];
+        console.log(">> FINISH TERPANGGIL - Winner:", winner);
+
+        socket.emit("gameStatusUpdate", {
+          gameStatus: "finished",
+          currentPlayers,
+          winner,
+          queueLength: queue?.length || 0, // lebih aman
+        });
+
+        gameStatus = "finished"; // update status lokal
+      }
 
       return; // Stop climbing lebih lanjut
     }
@@ -300,6 +418,41 @@
       lastEventOffset = currentOffset;
       triggerRandomEvent();
     }
+    checkCollision();
+  }
+
+  function checkCollision() {
+    const players = [
+      { el: document.querySelector(".player1"), name: "p1" },
+      { el: document.querySelector(".player2"), name: "p2" },
+    ];
+
+    players.forEach(({ el, name }) => {
+      const rect1 = el.getBoundingClientRect();
+
+      currentObstacles.forEach((obstacle, i) => {
+        const rect2 = obstacle.getBoundingClientRect();
+        if (isOverlap(rect1, rect2) && !isDodging[name]) {
+          console.log(`${name} terkena obstacle!`);
+          obstacle.remove();
+          currentObstacles.splice(i, 1);
+        }
+      });
+
+      currentCoins.forEach((coin, i) => {
+        const rect2 = coin.getBoundingClientRect();
+        if (isOverlap(rect1, rect2)) {
+          console.log(`${name} mengambil coin!`);
+          coin.remove();
+          currentCoins.splice(i, 1);
+          // Tambah skor di sini
+        }
+      });
+    });
+  }
+
+  function isOverlap(r1, r2) {
+    return !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top);
   }
 
   function triggerRandomEvent() {
@@ -330,23 +483,18 @@
   }
 
   function spawnObstacle() {
-    // Hapus obstacle lama jika ada
-    if (currentObstacle) {
-      currentObstacle.remove();
-    }
-
     const obstacle = document.createElement("img");
     obstacle.src = "/assets/env/item/obstacle/IMG_1020.GIF";
     obstacle.className = "obstacle";
     obstacle.style.position = "absolute";
     obstacle.style.bottom = `${Math.abs(currentOffset) + 200}px`;
-    // obstacle.style.bottom = '200px';
-    obstacle.style.left = `${Math.random() * 80 + 10}%`; // acak posisi horizontal
-    obstacle.style.width = "50px";
+    obstacle.style.left = `${Math.random() * 80 + 10}%`;
+    obstacle.style.width = "500px";
     obstacle.style.zIndex = 4;
 
     document.querySelector(".scene").appendChild(obstacle);
-    currentObstacle = obstacle;
+    currentObstacles.push(obstacle);
+    console.log(">>> Obstacle spawned at", obstacle.style.left, obstacle.style.bottom);
   }
 
   function spawnCoins() {
@@ -449,6 +597,7 @@
       },
       { once: true }
     );
+    checkCollision();
   }
 
   function playFinishVideo(character) {
