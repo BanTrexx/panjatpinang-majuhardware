@@ -131,8 +131,8 @@
   }
 
   .circle-btn {
-    width: 121px;
-    height: 121px;
+    width: 150px;
+    height: 150px;
     border-radius: 100%;
     background: linear-gradient(180deg, #7ecb8f 0%, #5fa96d 100%);
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.13);
@@ -141,17 +141,22 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
-    color: #fff;
-    font-weight: 700;
     cursor: pointer;
-    transition: box-shadow 0.2s, transform 0.2s;
+    transition: box-shadow 0.2s, transform 0.2s, filter 0.2s;
     position: relative;
   }
 
   .circle-btn:active {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    transform: translateY(2px);
+    transform: translateY(2px) scale(0.97);
+    filter: brightness(90%);
+  }
+
+  .circle-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
   }
 
   .btn-label {
@@ -176,6 +181,13 @@
   .score-card {
     transition: opacity 0.3s;
   }
+
+  .btn-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 16px; /* beri jarak kiri kanan */
+}
+
 
   .btn-result {
     display: flex;
@@ -236,14 +248,32 @@
     <div class="player-name-card"><%= nama %></div>
     <div id="skor-permainan" style="display: none">
       <div class="d-flex justify-content-center" style="margin-bottom: 0">
-        <div class="px-4 py-2 text-dark" style="background-color: #f9d857; border-radius: 20px; font-size: 16px; color: #454545; font-family: 'Lexend', sans-serif; margin-bottom: -20px; position: relative; z-index: 2">Skor Permainan</div>
+        <div
+          class="px-4 py-2 text-dark"
+          style="
+            background-color: #f9d857;
+            border-radius: 20px;
+            font-size: 16px;
+            color: #454545;
+            font-family: 'Lexend', sans-serif;
+            margin-bottom: -20px;
+            position: relative;
+            z-index: 2;
+          "
+        >
+          Skor Permainan
+        </div>
       </div>
     </div>
     <div class="score-card" style="display: none">
       <div id="score-point"></div>
     </div>
     <% if (avatar) { %>
-    <img src="/assets/img/avatar/<%= avatar %>" alt="Avatar" class="avatar-big" />
+    <img
+      src="/assets/img/avatar/<%= avatar %>"
+      alt="Avatar"
+      class="avatar-big"
+    />
     <% } %>
 
     <div class="status-card">
@@ -254,16 +284,33 @@
     </div>
 
     <div class="btn-row mt-5">
-      <div class="text-center">
-        <button class="circle-btn" id="btnAvoid" type="button" disabled style="padding: 0; background: none; box-shadow: none; border: none">
-          <img id="imgAvoid" src="/assets/img/hindar.png" alt="Hindar" style="width: 158px; height: 158px; object-fit: contain" />
+        <button
+          class="circle-btn"
+          id="btnAvoid"
+          type="button"
+          disabled
+          style="padding: 0; background: none; box-shadow: none; border: none"
+        >
+          <img
+            id="imgAvoid"
+            src="/assets/img/hindar_press.png"
+            alt="Hindar"
+            style="width: 158px; height: 158px; object-fit: contain"
+          />
         </button>
-      </div>
-      <div class="text-center">
-        <button class="circle-btn" id="btnClimb" type="button" style="padding: 0; background: none; box-shadow: none; border: none">
-          <img id="imgClimb" src="/assets/img/panjat.png" alt="Panjat" style="width: 158px; height: 158px; object-fit: contain" />
+        <button
+          class="circle-btn"
+          id="btnClimb"
+          type="button"
+          style="padding: 0; background: none; box-shadow: none; border: none"
+        >
+          <img
+            id="imgClimb"
+            src="/assets/img/panjat_press.png"
+            alt="Panjat"
+            style="width: 158px; height: 158px; object-fit: contain"
+          />
         </button>
-      </div>
     </div>
     <div class="btn-result" style="display: none">
       <a href="/" class="btn-kembali">
@@ -314,7 +361,8 @@ Coba deh kamu juga!
 
   function renderStatus(status) {
     let text = "";
-    if (status === "waiting") text = "Tunggu pemain lain menyelesaikan permainannya dalam waktu";
+    if (status === "waiting")
+      text = "Tunggu pemain lain menyelesaikan permainannya dalam waktu";
     if (status === "countdown") text = "Countdown dimulai!";
     if (status === "playing") text = "Ayo tap secepatnya!";
     if (status === "finished") text = "Permainan selesai!";
@@ -340,7 +388,11 @@ Coba deh kamu juga!
       scoreCard.style.opacity = "0";
       statusCard.style.visibility = "visible";
       statusCard.style.opacity = "1";
-      if (avatarImg) avatarImg.style.display = "block";
+      if (avatarImg) {
+        avatarImg.style.display = "block";
+        avatarImg.style.marginLeft = "auto";
+        avatarImg.style.marginRight = "auto";
+      }
     } else if (status === "playing") {
       btnAvoid.disabled = false;
       btnClimb.disabled = false;
@@ -397,7 +449,11 @@ Coba deh kamu juga!
   function renderQueue() {
     const queueDiv = document.getElementById("queue");
     // Tampilkan antrian hanya jika user sedang menunggu giliran dan gameStatus 'playing'
-    if (gameStatus === "playing" && !currentPlayers.includes(playerName) && queueLength > 0) {
+    if (
+      gameStatus === "playing" &&
+      !currentPlayers.includes(playerName) &&
+      queueLength > 0
+    ) {
       queueDiv.style.display = "block";
       queueDiv.innerText = `Menunggu giliran... Antrian pemain: ${queueLength}`;
     } else {
@@ -429,7 +485,10 @@ Coba deh kamu juga!
     const skorContainer = document.getElementById("skor-permainan");
     const scoreCard = document.querySelector(".score-card");
 
-    if ((gameStatus === "playing" && currentPlayers.includes(playerName)) || gameStatus === "finished") {
+    if (
+      (gameStatus === "playing" && currentPlayers.includes(playerName)) ||
+      gameStatus === "finished"
+    ) {
       skorContainer.style.display = "block";
       scoreCard.style.display = "block";
     } else {
@@ -443,26 +502,35 @@ Coba deh kamu juga!
   });
 
   // --- Only listen for updates from app.js (relayed from display) ---
-  socket.on("gameStatusUpdate", ({ gameStatus: status, currentPlayers: players, winner: win, queueLength: ql }) => {
-    gameStatus = status;
-    currentPlayers = players;
-    winner = win;
-    queueLength = ql;
-    renderStatus(status);
-    renderWinner(win);
-    renderQueue();
-    updateScoreVisibility();
+  socket.on(
+    "gameStatusUpdate",
+    ({
+      gameStatus: status,
+      currentPlayers: players,
+      winner: win,
+      queueLength: ql,
+    }) => {
+      gameStatus = status;
+      currentPlayers = players;
+      winner = win;
+      queueLength = ql;
+      renderStatus(status);
+      renderWinner(win);
+      renderQueue();
+      updateScoreVisibility();
 
-    if (status !== "countdown") {
-      document.getElementById("countdown").innerText = "";
+      if (status !== "countdown") {
+        document.getElementById("countdown").innerText = "";
+      }
+      if (status !== "finished") {
+        document.getElementById("winner").innerText = "";
+      }
     }
-    if (status !== "finished") {
-      document.getElementById("winner").innerText = "";
-    }
-  });
+  );
 
   socket.on("countdown", (count) => {
-    document.getElementById("countdown").innerText = count > 0 ? `${count}` : "";
+    document.getElementById("countdown").innerText =
+      count > 0 ? `${count}` : "";
   });
 
   socket.on("gameFinished", ({ winner: win, score }) => {
@@ -474,43 +542,6 @@ Coba deh kamu juga!
     // setTimeout(() => {
     //   window.location.href = "/";
     // }, 5000);
-  });
-
-  const imgAvoid = document.getElementById("imgAvoid");
-  const imgClimb = document.getElementById("imgClimb");
-
-  btnAvoid.addEventListener("mousedown", () => {
-    imgAvoid.src = "/assets/img/hindar_press.png";
-  });
-  btnAvoid.addEventListener("mouseup", () => {
-    imgAvoid.src = "/assets/img/hindar.png";
-  });
-  btnAvoid.addEventListener("mouseleave", () => {
-    imgAvoid.src = "/assets/img/hindar.png";
-  });
-
-  btnClimb.addEventListener("mousedown", () => {
-    imgClimb.src = "/assets/img/panjat_press.png";
-  });
-  btnClimb.addEventListener("mouseup", () => {
-    imgClimb.src = "/assets/img/panjat.png";
-  });
-  btnClimb.addEventListener("mouseleave", () => {
-    imgClimb.src = "/assets/img/panjat.png";
-  });
-
-  btnAvoid.addEventListener("touchstart", () => {
-    imgAvoid.src = "/assets/img/hindar_press.png";
-  });
-  btnAvoid.addEventListener("touchend", () => {
-    imgAvoid.src = "/assets/img/hindar.png";
-  });
-
-  btnClimb.addEventListener("touchstart", () => {
-    imgClimb.src = "/assets/img/panjat_press.png";
-  });
-  btnClimb.addEventListener("touchend", () => {
-    imgClimb.src = "/assets/img/panjat.png";
   });
 </script>
 

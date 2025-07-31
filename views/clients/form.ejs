@@ -371,22 +371,38 @@
     spaceBetween: 20,
     loop: true,
     on: {
-      slideChangeTransitionEnd: function () {
-        highlightCircle.classList.remove("circle-small");
+       init: function () {
+      // Ambil slide aktif saat pertama kali inisialisasi
+      const activeSlide = this.slides[this.activeIndex];
+      const imgEl = activeSlide.querySelector("img");
 
-        const activeSlide = this.slides[this.activeIndex];
-        const imgEl = activeSlide.querySelector("img");
+      if (imgEl) {
+        const src = imgEl.getAttribute("src");
+        const fileName = src.split("/").pop();
+        avatarInput.value = fileName;
 
-        if (imgEl) {
-          const src = imgEl.getAttribute("src");
-          const fileName = src.split("/").pop(); // 👉 ambil nama file terakhir dari path
-
-          avatarInput.value = fileName;
-        }
-      },
-      touchStart: function () {
-        highlightCircle.classList.add("circle-small");
-      },
+        console.log("Avatar default (init):", fileName);
+      }
     },
-  });
+    slideChangeTransitionEnd: function () {
+      highlightCircle.classList.remove("circle-small");
+
+      const activeSlide = this.slides[this.activeIndex];
+      const imgEl = activeSlide.querySelector("img");
+
+      if (imgEl) {
+        const src = imgEl.getAttribute("src");
+        const fileName = src.split("/").pop();
+        avatarInput.value = fileName;
+
+        console.log("Avatar terpilih:", fileName);
+        console.log("Index aktif:", this.realIndex);
+      }
+    },
+    touchStart: function () {
+      highlightCircle.classList.add("circle-small");
+      console.log("Mulai swipe...");
+    },
+  },
+});
 </script>
