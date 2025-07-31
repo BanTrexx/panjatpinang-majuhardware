@@ -145,6 +145,7 @@
   let winner = null;
   let queue = [];
   let countdownTimer = null;
+  const height = window.innerHeight;
 
   function startGame() {
     gameStatus = "playing";
@@ -244,8 +245,7 @@
   let currentCoins = [];
   let currentPlane = null;
   let currentBird = null;
-
-  triggerRandomEvent();
+  let currentPinangFinish = null;
 
   // Helper untuk inisialisasi video
   function initVideo(el, src, { autoplay = true, muted = true, loop = false } = {}) {
@@ -264,38 +264,6 @@
   initVideo(player2vid, SRC.p2, { autoplay: true, muted: true, loop: false });
   initVideo(pinangVid, SRC.pinang, { autoplay: false, muted: true, loop: false });
 
-  // Contoh kontrol lewat variabel:
-  function pausePlayers() {
-    player1vid.pause();
-    player2vid.pause();
-  }
-
-  function playPlayers() {
-    player1vid.play();
-    player2vid.play();
-  }
-
-  function pausePinang() {
-    pinangVid.pause();
-  }
-
-  function playPinang() {
-    pinangVid.play();
-  }
-
-  function changePinangVideo(newSrc) {
-    pinangVid.src = newSrc;
-    pinangVid.load();
-    pinangVid.play();
-  }
-
-  // Contoh ganti source dinamis:
-  function changeP1ToRunAnim() {
-    player1vid.src = "/assets/char/mas_ware/run/run.webm";
-    player1vid.currentTime = 0;
-    player1vid.play();
-  }
-
   let isClimbing = {
     p1: false,
     p2: false,
@@ -304,45 +272,12 @@
   function climb(character) {
     if (isDodging[character] || isClimbing[character]) return;
 
-    const isP1 = character === "p1";
-    const climber = isP1 ? player1vid : player2vid;
-    const climberContainer = isP1 ? document.querySelector(".player1") : document.querySelector(".player2");
-    const otherPlayerContainer = isP1 ? document.querySelector(".player2") : document.querySelector(".player1");
+    if (currentOffset <= maxOffset) {
+      console.log(`${character.toUpperCase()} telah mencapai UJUNG batang! 🎉`);
+      console.log("Mengganti video batang ke pinang-finish.webm");
 
-    isClimbing[character] = true;
-
-    // 1. Ganti animasi climb
-    climber.src = climbSrc;
-    climber.loop = false;
-    climber.currentTime = 0;
-    climber.play();
-
-    // 2. Play batang pinang sekali
-    pinangVid.currentTime = 0;
-    pinangVid.loop = false;
-    pinangVid.play();
-
-    // 3. Player lain turun
-    const otherBottom = parseInt(window.getComputedStyle(otherPlayerContainer).bottom);
-    otherPlayerContainer.style.bottom = `${otherBottom - 50}px`;
-
-    // 4. Player ini naik
-    const climberBottom = parseInt(window.getComputedStyle(climberContainer).bottom);
-    const newClimberBottom = climberBottom + 100;
-
-    if (newClimberBottom <= 720) {
-      climberContainer.style.bottom = `${newClimberBottom}px`;
+      return; // Stop climbing lebih lanjut
     }
-
-    // 5. Pause di akhir animasi (idle = frame terakhir)
-    climber.addEventListener(
-      "ended",
-      () => {
-        climber.pause(); // Biarkan di frame terakhir
-        isClimbing[character] = false;
-      },
-      { once: true }
-    );
 
     currentOffset -= 100;
 
@@ -357,10 +292,61 @@
       coin.style.bottom = `${newBottom}px`;
 
       if (newBottom <= 0) {
-        console.log("true");
         coin.remove();
       }
     });
+
+    if (currentOffset <= maxOffset + height) {
+      memanjat(character);
+
+      if (currentPinangFinish) {
+        const currentPinangFinishBottom = parseInt(window.getComputedStyle(currentPinangFinish).bottom);
+        currentPinangFinish.style.bottom = `${currentPinangFinishBottom - 100}px`;
+        const pinangVidBottom = parseInt(window.getComputedStyle(pinangVid).bottom);
+        pinangVid.style.bottom = `${pinangVidBottom - 100}px`;
+
+        return;
+      } else {
+        console.log("spawn next pinang");
+
+        const newPinang = document.createElement("video");
+        newPinang.src = "/assets/env/item/pinang/finish.webm";
+        newPinang.className = "new-pinang";
+        newPinang.autoplay = true;
+        newPinang.loop = true;
+        newPinang.muted = true; // untuk autoplay biasanya perlu muted
+        newPinang.playsInline = true;
+
+        Object.assign(newPinang.style, {
+          position: "absolute",
+          bottom: "0",
+          left: "50%",
+          transform: "translateX(-50%)",
+          height: "auto",
+          maxHeight: "100%",
+          zIndex: "1",
+          pointerEvents: "none",
+          bottom: height + "px",
+        });
+
+        document.querySelector(".scene").appendChild(newPinang);
+
+        currentPinangFinish = newPinang;
+
+        const newPinangBottom = parseInt(window.getComputedStyle(newPinang).bottom);
+        newPinang.style.bottom = `${newPinangBottom - 100}px`;
+        const pinangVidBottom = parseInt(window.getComputedStyle(pinangVid).bottom);
+        pinangVid.style.bottom = `${pinangVidBottom - 100}px`;
+
+        return;
+      }
+    }
+
+    memanjat(character);
+
+    pinangVid.currentTime = 0;
+    pinangVid.loop = false;
+    pinangVid.play();
 
     currentObstacles.forEach((obstacle, i) => {
       const currentBottom = parseInt(window.getComputedStyle(obstacle).bottom);
@@ -373,53 +359,50 @@
       }
     });
 
-    if (currentOffset <= maxOffset) {
-      console.log(`${character.toUpperCase()} telah mencapai UJUNG batang! 🎉`);
-      console.log("Mengganti video batang ke pinang-finish.webm");
-
-      // Ganti video batang
-      pinangVid.pause();
-      pinangVid.src = SRC.pinangFinish;
-      pinangVid.load();
-      pinangVid.currentTime = 0;
-      pinangVid.loop = false;
-
-      pinangVid.addEventListener(
-        "loadeddata",
-        () => {
-          pinangVid.play().catch((err) => {
-            console.error("Gagal play pinangFinish:", err);
-          });
-        },
-        { once: true }
-      );
-
-      // Animasi finish pemain
-      playFinishVideo(character);
-
-      if (gameStatus === "playing") {
-        winner = character === "p1" ? currentPlayers[0] : currentPlayers[1];
-        console.log(">> FINISH TERPANGGIL - Winner:", winner);
-
-        socket.emit("gameStatusUpdate", {
-          gameStatus: "finished",
-          currentPlayers,
-          winner,
-          queueLength: queue?.length || 0, // lebih aman
-        });
-
-        gameStatus = "finished"; // update status lokal
-      }
-
-      return; // Stop climbing lebih lanjut
-    }
-
     // Cek apakah offset saat ini melewati kelipatan 500
     if (Math.abs(currentOffset - lastEventOffset) >= eventInterval) {
       lastEventOffset = currentOffset;
       triggerRandomEvent();
     }
     checkCollision();
+  }
+
+  function memanjat(character) {
+    if (isDodging[character] || isClimbing[character]) return;
+    const isP1 = character === "p1";
+    const climber = isP1 ? player1vid : player2vid;
+    const climberContainer = isP1 ? document.querySelector(".player1") : document.querySelector(".player2");
+    const otherPlayerContainer = isP1 ? document.querySelector(".player2") : document.querySelector(".player1");
+
+    isClimbing[character] = true;
+
+    // 1. Ganti animasi climb
+    climber.src = climbSrc;
+    climber.loop = false;
+    climber.currentTime = 0;
+    climber.play();
+
+    // 3. Player lain turun
+    const otherBottom = parseInt(window.getComputedStyle(otherPlayerContainer).bottom);
+    otherPlayerContainer.style.bottom = `${otherBottom - 50}px`;
+
+    // 4. Player ini naik
+    const climberBottom = parseInt(window.getComputedStyle(climberContainer).bottom);
+    const newClimberBottom = climberBottom + 100;
+
+    if (newClimberBottom <= 600) {
+      climberContainer.style.bottom = `${newClimberBottom}px`;
+    }
+
+    // 5. Pause di akhir animasi (idle = frame terakhir)
+    climber.addEventListener(
+      "ended",
+      () => {
+        climber.pause(); // Biarkan di frame terakhir
+        isClimbing[character] = false;
+      },
+      { once: true }
+    );
   }
 
   function checkCollision() {
@@ -466,7 +449,7 @@
     const delayobstacle = Math.random() * 2000;
     setTimeout(() => {
       console.log("obstacle");
-      spawnObstacle();
+      // spawnObstacle();
     }, delayobstacle);
 
     const delaycoin = Math.random() * 5000;
