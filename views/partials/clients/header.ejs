@@ -18,11 +18,44 @@
         width: 100px;
         height: auto;
       }
+
+      .custom-btn {
+         display: flex;
+  align-items: center;
+  justify-content: center;
+      background: linear-gradient(90deg, #9f7fff 0%, #8055fe 100%);
+      color: white;
+      width: 246px;
+      /* Lebar sesuai permintaan */
+      height: 54px;
+      /* Tinggi sesuai permintaan */
+      border: none;
+      border-radius: 100px;
+      font-weight: 600;
+      font-size: 1rem;
+      box-shadow: 0 10px 25px rgba(128, 85, 254, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .custom-btn:hover {
+      box-shadow: 0 12px 30px rgba(128, 85, 254, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .btn-wrapper {
+      position: fixed;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+    }
     </style>
      <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
     />
+    <link href="https://fonts.googleapis.com/css2?family=Rubik+One&display=swap" rel="stylesheet">
+
   </head>
   <body style="min-height: 100vh; margin: 0; padding: 0; box-sizing: border-box; background: linear-gradient(180deg, #ff9051 0%, #ffd651 100%)">
     <div class="logo-center">

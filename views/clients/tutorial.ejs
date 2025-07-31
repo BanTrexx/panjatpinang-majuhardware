@@ -1,49 +1,22 @@
 <%- include('../partials/clients/header') %>
 
-<style>
-  /* Menghilangkan underline dari a */
-  a {
-    text-decoration: none;
-  }
+  <style>
+    /* Menghilangkan underline dari a */
+    a {
+      text-decoration: none;
+    }
 
-  /* Typography Bowlby One SC ukuran 40px */
-  .bowlby-text {
-    font-family: "Bowlby One SC", cursive;
-    font-size: 40px;
-  }
+    .card-body img {
+      width: 108px;
+      height: 108px;
+      object-fit: contain;
+    }
+  </style>
 
-  .custom-btn {
-    background: linear-gradient(90deg, #9f7fff 0%, #8055fe 100%);
-    color: white;
-    padding: 0.75rem 2.5rem;
-    border: none;
-    border-radius: 100px;
-    font-weight: 600;
-    font-size: 1rem;
-    box-shadow: 0 10px 25px rgba(128, 85, 254, 0.4);
-    transition: all 0.3s ease;
-  }
-
-  .custom-btn:hover {
-    box-shadow: 0 12px 30px rgba(128, 85, 254, 0.6);
-    transform: translateY(-2px);
-  }
-
-  .card-body img {
-  width: 108px;
-  height: 108px;
-  object-fit: contain;
-}
-</style>
-
-<main
-  class="d-flex justify-content-center align-items-center mt-5 position-relative"
->
-  <div class="px-4 text-center" style="max-width: 400px; width: 100%">
-    <div class="d-flex justify-content-center" style="margin-bottom: 0">
-      <div
-        class="px-4 py-2 text-dark"
-        style="
+  <main class="d-flex justify-content-center align-items-center mt-5 position-relative">
+    <div class="px-4 text-center" style="max-width: 400px; width: 100%">
+      <div class="d-flex justify-content-center" style="margin-bottom: 0">
+        <div class="px-4 py-2 text-dark" style="
           background-color: #f9d857;
           border-radius: 20px;
           font-size: 16px;
@@ -52,42 +25,40 @@
           margin-bottom: -20px;
           position: relative;
           z-index: 2;
-        "
-      >
-        Cara Bermain
-      </div>
-    </div>
-
-    <div
-      class="card mb-4 shadow-lg"
-      style="border-radius: 30px; background-color: white; min-height: 120px"
-    >
-      <div class="card-body mt-3">
-        <div class="row">
-          <div class="col-6 text-center">
-            <img class="img-fluid" src="/assets/img/hindar.png" alt="" />
-            <p>Tekan untuk menghindari rintangan</p>
-          </div>
-          <div class="col-6 text-center">
-            <img class="img-fluid" src="/assets/img/panjat.png" alt="" />
-            <p>Tekan untuk memanjat</p>
-          </div>
+        ">
+          Cara Bermain
         </div>
-        <div class="row">
-          <div class="col-6 text-center">
-            <img class="img-fluid" src="/assets/img/obstacle.png" alt="" />
-            <p>Hindari Rintangan</p>
+      </div>
+
+      <div class="card mb-4 shadow-lg" style="border-radius: 30px; background-color: white; min-height: 120px">
+        <div class="card-body mt-3">
+          <div class="row">
+            <div class="col-6 text-center">
+              <img class="img-fluid" src="/assets/img/hindar.png" alt="" />
+              <p>Tekan untuk menghindari rintangan</p>
+            </div>
+            <div class="col-6 text-center">
+              <img class="img-fluid" src="/assets/img/panjat.png" alt="" />
+              <p>Tekan untuk memanjat</p>
+            </div>
           </div>
-          <div class="col-6 text-center">
-            <img class="img-fluid" src="/assets/img/koin.png" alt="" />
-            <p>Dapatkan Bonus Poin</p>
+          <div class="row">
+            <div class="col-6 text-center">
+              <img class="img-fluid" src="/assets/img/obstacle.gif" alt="" />
+              <p>Hindari Rintangan</p>
+            </div>
+            <div class="col-6 text-center">
+              <img class="img-fluid" src="/assets/img/coin.gif" alt="" />
+              <p>Dapatkan Bonus Poin</p>
+            </div>
           </div>
         </div>
       </div>
+
+      <div class="btn-wrapper">
+        <a href="/game" class="custom-btn">Mulai Permainan</a>
+      </div>
     </div>
+  </main>
 
-    <a href="/game" class="custom-btn">Mulai Permainan</a>
-  </div>
-</main>
-
-<%- include('../partials/clients/footer') %>
+  <%- include('../partials/clients/footer') %>

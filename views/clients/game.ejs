@@ -25,6 +25,9 @@
     background: #fff;
     border-radius: 100px;
     padding: 10px 32px;
+    width: 100%;        /* ← lebar sesuai permintaan */
+     max-width: 234px;
+  height: 45.78px;     /* ← tinggi sesuai permintaan */
     font-size: 20px;
     font-weight: 600;
     margin-bottom: 18px;
@@ -134,7 +137,6 @@
     width: 150px;
     height: 150px;
     border-radius: 100%;
-    background: linear-gradient(180deg, #7ecb8f 0%, #5fa96d 100%);
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.13);
     border: none;
     outline: none;
@@ -185,7 +187,6 @@
   .btn-row {
   display: flex;
   justify-content: space-between;
-  padding: 0 16px; /* beri jarak kiri kanan */
 }
 
 
@@ -266,11 +267,11 @@
       </div>
     </div>
     <div class="score-card" style="display: none">
-      <div id="score-point"></div>
+      <div id="score-point">0</div>
     </div>
     <% if (avatar) { %>
     <img
-      src="/assets/img/avatar/<%= avatar %>"
+      src="/assets/img/karakter/<%= avatar %>"
       alt="Avatar"
       class="avatar-big"
     />
@@ -289,7 +290,6 @@
           id="btnAvoid"
           type="button"
           disabled
-          style="padding: 0; background: none; box-shadow: none; border: none"
         >
           <img
             id="imgAvoid"
@@ -302,7 +302,6 @@
           class="circle-btn"
           id="btnClimb"
           type="button"
-          style="padding: 0; background: none; box-shadow: none; border: none"
         >
           <img
             id="imgClimb"

@@ -1,408 +1,362 @@
 <%- include('../partials/clients/header') %>
 
-<style>
-  .shadow-soft {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    border-radius: 20px;
-    background-color: white;
-  }
+  <style>
+    .shadow-soft {
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border-radius: 20px;
+      background-color: white;
+    }
 
-  .custom-btn {
-    background: linear-gradient(90deg, #9f7fff 0%, #8055fe 100%);
-    color: white;
-    padding: 0.75rem 2.5rem;
-    border: none;
-    border-radius: 100px;
-    font-weight: 600;
-    font-size: 1rem;
-    box-shadow: 0 10px 25px rgba(128, 85, 254, 0.4);
-    transition: all 0.3s ease;
-  }
+    .avatar-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+    }
 
-  .custom-btn:hover {
-    box-shadow: 0 12px 30px rgba(128, 85, 254, 0.6);
-    transform: translateY(-2px);
-  }
+    .avatar-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    }
 
-  .avatar-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    cursor: pointer;
-  }
+    .avatar-card.selected {
+      border: 3px solid #f9d857;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+    }
 
-  .avatar-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-  }
+    .gender-btn.active {
+      background-color: #ffc107;
+      color: #000;
+      border: none;
+    }
 
-  .avatar-card.selected {
-    border: 3px solid #f9d857;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
-  }
+    .section-title {
+      font-weight: 600;
+      font-size: 18px;
+    }
 
-  .gender-btn.active {
-    background-color: #ffc107;
-    color: #000;
-    border: none;
-  }
+    .avatars {
+      display: flex;
+      gap: 50px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
 
-  .section-title {
-    font-weight: 600;
-    font-size: 18px;
-  }
+    .avatar-card {
+      background-color: white;
+      border-radius: 20px;
+      padding: 10px;
+      width: 100%;
+      max-width: 148px;
+      height: auto;
+      aspect-ratio: 148 / 262;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.1);
+    }
 
-  .section-label {
-    text-align: center;
-    background-color: #ffde74;
-    border-radius: 20px;
-    padding: 8px 16px;
-    font-size: 16px;
-    font-weight: 500; /* Medium weight */
-    font-family: "Lexend", sans-serif;
-    margin-bottom: 15px;
-    font-weight: 500;
-    color: #222;
-  }
+    .avatar-card:hover {
+      transform: translateY(-5px);
+    }
 
-  .avatars {
-    display: flex;
-    gap: 50px;
-    justify-content: center;
-    margin-bottom: 20px;
-  }
+    .avatar-card {
+      position: relative;
+      overflow: visible;
+      /* default-nya biasanya hidden */
+      z-index: 1;
+    }
 
-  .avatar-card {
-    background-color: white;
-    border-radius: 20px;
-    padding: 10px;
-    width: 100%;
-    max-width: 148px;
-    height: auto;
-    aspect-ratio: 148 / 262;
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.2s;
-    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.1);
-  }
+    .avatar-img {
+      width: 130%;
+      /* lebih besar dari card */
+      height: auto;
+      object-fit: cover;
+      position: absolute;
+      transform: translateX(-50%);
+      z-index: 2;
+    }
 
-  .avatar-card:hover {
-    transform: translateY(-5px);
-  }
+    .gender-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 25px;
+    }
 
-  .avatar-card {
-    position: relative;
-    overflow: visible; /* default-nya biasanya hidden */
-    z-index: 1;
-  }
+    .gender-btn {
+      border: none;
+      border-radius: 20px;
+      padding: 10px 16px;
+      font-weight: bold;
+      font-size: 14px;
+      flex: 1;
+      cursor: pointer;
+      background-color: white;
+      color: #222;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
 
-  .avatar-img {
-    width: 130%; /* lebih besar dari card */
-    height: auto;
-    object-fit: cover;
-    position: absolute;
-    transform: translateX(-50%);
-    z-index: 2;
-  }
+    .gender-btn.active {
+      background-color: #ffffff;
+      border: 2px solid #4f46e5;
+      color: #4f46e5;
+    }
 
-  .gender-buttons {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    margin-bottom: 25px;
-  }
+    input[type="radio"] {
+      display: none;
+    }
 
-  .gender-btn {
-    border: none;
-    border-radius: 20px;
-    padding: 10px 16px;
-    font-weight: bold;
-    font-size: 14px;
-    flex: 1;
-    cursor: pointer;
-    background-color: white;
-    color: #222;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  }
+    .avatar-card img.grayscale {
+      filter: grayscale(100%);
+      transition: filter 0.3s ease;
+    }
 
-  .gender-btn.active {
-    background-color: #ffffff;
-    border: 2px solid #4f46e5;
-    color: #4f46e5;
-  }
+    .avatar-card input[type="radio"]:checked+img {
+      filter: none !important;
+    }
 
-  input[type="radio"] {
-    display: none;
-  }
+    .card {
+      flex: 0 0 auto;
+      width: 221.73px;
+      height: 221.73px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.3s ease;
+      transform: scale(0.8);
+      opacity: 0.5;
+      background: none;
+      border: none;
+      box-shadow: none;
+    }
 
-  .avatar-card img.grayscale {
-    filter: grayscale(100%);
-    transition: filter 0.3s ease;
-  }
+    .card img {
+      max-width: 130%;
+      max-height: 130%;
+      object-fit: contain;
+      border-radius: 20px;
+    }
 
-  .avatar-card input[type="radio"]:checked + img {
-    filter: none !important;
-  }
+    .nav-button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 28px;
+      background: rgba(255, 255, 255, 0.95);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
 
-  .card {
-    flex: 0 0 auto;
-    width: 221.73px;
-    height: 221.73px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: all 0.3s ease;
-    transform: scale(0.8);
-    opacity: 0.5;
-    background: none;
-    border: none;
-    box-shadow: none;
-  }
+    .nav-button.left {
+      left: 10px;
+    }
 
-  .card img {
-    max-width: 130%;
-    max-height: 130%;
-    object-fit: contain;
-    border-radius: 20px;
-  }
+    .nav-button.right {
+      right: 10px;
+    }
 
-  .nav-button {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 28px;
-    background: rgba(255, 255, 255, 0.95);
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-    z-index: 10;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  }
+    .nav-button.left,
+    .nav-button.right {
+      display: none;
+    }
 
-  .nav-button.left {
-    left: 10px;
-  }
+    /* swipe carousel  */
 
-  .nav-button.right {
-    right: 10px;
-  }
+    .carousel-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      margin: auto;
+    }
 
-  .nav-button.left,
-  .nav-button.right {
-    display: none;
-  }
+    .center-circle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(1);
+      width: 313px;
+      height: 313px;
+      border-radius: 200%;
+      background-color: rgba(255, 255, 255, 0.4);
+      /* ⬅ fill putih 40% */
+      z-index: 0;
+      transition: transform 0.3s ease;
+      pointer-events: none;
+    }
 
-  /* swipe carousel  */
+    .circle-small {
+      transform: translate(-50%, -50%) scale(0.7);
+    }
 
-  .carousel-wrapper {
-    position: relative;
-    width: 100%;
-    max-width: 600px;
-    margin: auto;
-  }
+    .swiper {
+      padding: 60px 0;
+      position: relative;
+      z-index: 1;
+      /* ⬆ character images are above the circle */
+    }
 
-  .center-circle {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(1);
-    width: 313px;
-    height: 313px;
-    border-radius: 200%;
-    background-color: rgba(255, 255, 255, 0.4); /* ⬅ fill putih 40% */
-    z-index: 0;
-    transition: transform 0.3s ease;
-    pointer-events: none;
-  }
+    .swiper-slide {
+      opacity: 0.5;
+      transform: scale(0.8);
+      transition: transform 0.3s, opacity 0.3s;
+      display: flex;
+      justify-content: center;
+    }
 
-  .circle-small {
-    transform: translate(-50%, -50%) scale(0.7);
-  }
+    .swiper-slide-active {
+      opacity: 1;
+      transform: scale(1.1);
+    }
 
-  .swiper {
-    padding: 60px 0;
-    position: relative;
-    z-index: 1; /* ⬆ character images are above the circle */
-  }
+    .swiper-slide img {
+      width: 250px;
+      height: auto;
+      border-radius: 12px;
+    }
 
-  .swiper-slide {
-    opacity: 0.5;
-    transform: scale(0.8);
-    transition: transform 0.3s, opacity 0.3s;
-    display: flex;
-    justify-content: center;
-  }
+    .avatarInput {
+      margin-top: 20px;
+      font-size: 1.4rem;
+      font-weight: bold;
+    }
+  </style>
 
-  .swiper-slide-active {
-    opacity: 1;
-    transform: scale(1.1);
-  }
-
-  .swiper-slide img {
-    width: 250px;
-    height: auto;
-    border-radius: 12px;
-  }
-
-  .avatarInput {
-    margin-top: 20px;
-    font-size: 1.4rem;
-    font-weight: bold;
-  }
-</style>
-
-<main class="d-flex justify-content-center align-items-center mt-5">
-  <div class="px-4 text-center" style="max-width: 400px; width: 100%">
-    <p
-      class="mb-4"
-      style="
-        font-family: 'Lexend', sans-serif;
+  <main class="d-flex justify-content-center align-items-center mt-5">
+    <div class="px-4 text-center" style="max-width: 400px; width: 100%">
+      <p class="mb-4" style="
+         font-family: 'Rubik One', sans-serif;
         font-size: 25px;
         color: #000000;
-        font-weight: bold;
-      "
-      id="title-form"
-    >
-      ISI DATA DIRI SEBELUM <br />
-      MEMULAI PERMAINAN.
-    </p>
+        font-weight: normal;
+      " id="title-form">
+        ISI DATA DIRI SEBELUM <br />
+        MEMULAI PERMAINAN.
+      </p>
 
-    <form action="/tutor" method="POST">
-      <input type="hidden" name="avatar" id="avatarInput" />
-      <div id="dataDiriSection">
-        <div class="form-floating mb-3 shadow-soft">
-          <input
-            type="text"
-            class="form-control rounded-4"
-            name="name"
-            placeholder="Nama Karakter"
-            required
-          />
-          <label>Nama Karakter</label>
+      <form action="/tutor" method="POST">
+        <input type="hidden" name="avatar" id="avatarInput" />
+        <div id="dataDiriSection">
+          <div class="form-floating mb-3 shadow-soft">
+            <input type="text" class="form-control rounded-4" name="name" maxlength="10" placeholder="Nama Karakter"
+              required />
+            <label>Nama Karakter</label>
+          </div>
+          <div class="form-floating mb-3 shadow-soft">
+            <input type="text" class="form-control rounded-4" name="namalengkap" placeholder="Nama lengkap" required />
+            <label>Nama Lengkap</label>
+          </div>
+          <div class="form-floating mb-3 shadow-soft">
+            <input type="number" class="form-control rounded-4" name="notlp" placeholder="Nomor HP" required />
+            <label>Nomor HP</label>
+          </div>
+          <div class="form-floating mb-4 shadow-soft">
+            <input type="text" class="form-control rounded-4" name="ig" placeholder="Instagram" required />
+            <label>Instagram</label>
+          </div>
+          <div class="btn-wrapper">
+            <button type="button" id="nextStep" class="custom-btn">Lanjut</button>
+          </div>
         </div>
-        <div class="form-floating mb-3 shadow-soft">
-          <input
-            type="text"
-            class="form-control rounded-4"
-            name="namalengkap"
-            placeholder="Nama lengkap"
-            required
-          />
-          <label>Nama Lengkap</label>
-        </div>
-        <div class="form-floating mb-3 shadow-soft">
-          <input
-            type="number"
-            class="form-control rounded-4"
-            name="notlp"
-            placeholder="Nomor HP"
-            required
-          />
-          <label>Nomor HP</label>
-        </div>
-        <div class="form-floating mb-4 shadow-soft">
-          <input
-            type="text"
-            class="form-control rounded-4"
-            name="ig"
-            placeholder="Instagram"
-            required
-          />
-          <label>Instagram</label>
-        </div>
-        <div class="text-center mt-4">
-          <button type="button" id="nextStep" class="custom-btn">Lanjut</button>
-        </div>
-      </div>
 
-      <div id="genderAvatarSection" style="display: none">
-        <div class="section-label">Pilih Karakter</div>
-        <div class="carousel-wrapper">
-          <!-- Lingkaran highlight di belakang -->
-          <div class="center-circle" id="highlightCircle"></div>
+        <div id="genderAvatarSection" style="display: none">
+          <p class="mb-4" style="
+         font-family: 'Rubik One', sans-serif;
+        font-size: 25px;
+        color: #000000;
+        font-weight: normal;
+      " id="title-form">
+            PILIH KARAKTERMU
+          </p>
+          <div class="carousel-wrapper">
+            <!-- Lingkaran highlight di belakang -->
+            <div class="center-circle" id="highlightCircle"></div>
 
-          <!-- Swiper container -->
-          <div class="swiper mySwiper">
-            <div class="swiper-wrapper">
-              <div class="swiper-slide">
-                <img src="/assets/img/avatar/male1.png" alt="A" />
-              </div>
-              <div class="swiper-slide">
-                <img src="/assets/img/avatar/female1.png" alt="B" />
-              </div>
-              <div class="swiper-slide">
-                <img src="/assets/img/avatar/male2.png" alt="C" />
-              </div>
-              <div class="swiper-slide">
-                <img src="/assets/img/avatar/female2.png" alt="D" />
+            <!-- Swiper container -->
+            <div class="swiper mySwiper">
+              <div class="swiper-wrapper">
+                <div class="swiper-slide">
+                  <img src="/assets/img/avatar/m1.png" alt="A" />
+                </div>
+                <div class="swiper-slide">
+                  <img src="/assets/img/avatar/f1.png" alt="B" />
+                </div>
+                <div class="swiper-slide">
+                  <img src="/assets/img/avatar/m2.png" alt="C" />
+                </div>
+                <div class="swiper-slide">
+                  <img src="/assets/img/avatar/f2.png" alt="D" />
+                </div>
               </div>
             </div>
           </div>
+          <!-- SUBMIT BUTTON -->
+          <div class="btn-wrapper">
+            <button type="submit" class="custom-btn">Daftar</button>
+          </div>
         </div>
-        <!-- SUBMIT BUTTON -->
-        <div class="text-center mt-4">
-          <button type="submit" class="custom-btn">Daftar</button>
-        </div>
-      </div>
-    </form>
-  </div>
-</main>
+      </form>
+    </div>
+  </main>
 
-<%- include('../partials/clients/footer') %>
+  <%- include('../partials/clients/footer') %>
 
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-<script>
-  document.getElementById("nextStep").addEventListener("click", function () {
-    document.getElementById("dataDiriSection").style.display = "none";
-    document.getElementById("genderAvatarSection").style.display = "block";
-    document.getElementById("title-form").style.display = "none";
-  });
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+      document.getElementById("nextStep").addEventListener("click", function () {
+        document.getElementById("dataDiriSection").style.display = "none";
+        document.getElementById("genderAvatarSection").style.display = "block";
+        document.getElementById("title-form").style.display = "none";
+      });
 
-  const avatarInput = document.getElementById("avatarInput");
-  const highlightCircle = document.getElementById("highlightCircle");
+      const avatarInput = document.getElementById("avatarInput");
+      const highlightCircle = document.getElementById("highlightCircle");
 
-  const swiper = new Swiper(".mySwiper", {
-    slidesPerView: 1,
-    centeredSlides: true,
-    spaceBetween: 20,
-    loop: true,
-    on: {
-       init: function () {
-      // Ambil slide aktif saat pertama kali inisialisasi
-      const activeSlide = this.slides[this.activeIndex];
-      const imgEl = activeSlide.querySelector("img");
+      const swiper = new Swiper(".mySwiper", {
+        slidesPerView: 1,
+        centeredSlides: true,
+        spaceBetween: 20,
+        loop: true,
+        on: {
+          init: function () {
+            // Ambil slide aktif saat pertama kali inisialisasi
+            const activeSlide = this.slides[this.activeIndex];
+            const imgEl = activeSlide.querySelector("img");
 
-      if (imgEl) {
-        const src = imgEl.getAttribute("src");
-        const fileName = src.split("/").pop();
-        avatarInput.value = fileName;
+            if (imgEl) {
+              const src = imgEl.getAttribute("src");
+              const fileName = src.split("/").pop();
+              avatarInput.value = fileName;
 
-        console.log("Avatar default (init):", fileName);
-      }
-    },
-    slideChangeTransitionEnd: function () {
-      highlightCircle.classList.remove("circle-small");
+              console.log("Avatar default (init):", fileName);
+            }
+          },
+          slideChangeTransitionEnd: function () {
+            highlightCircle.classList.remove("circle-small");
 
-      const activeSlide = this.slides[this.activeIndex];
-      const imgEl = activeSlide.querySelector("img");
+            const activeSlide = this.slides[this.activeIndex];
+            const imgEl = activeSlide.querySelector("img");
 
-      if (imgEl) {
-        const src = imgEl.getAttribute("src");
-        const fileName = src.split("/").pop();
-        avatarInput.value = fileName;
+            if (imgEl) {
+              const src = imgEl.getAttribute("src");
+              const fileName = src.split("/").pop();
+              avatarInput.value = fileName;
 
-        console.log("Avatar terpilih:", fileName);
-        console.log("Index aktif:", this.realIndex);
-      }
-    },
-    touchStart: function () {
-      highlightCircle.classList.add("circle-small");
-      console.log("Mulai swipe...");
-    },
-  },
-});
-</script>
+              console.log("Avatar terpilih:", fileName);
+              console.log("Index aktif:", this.realIndex);
+            }
+          },
+          touchStart: function () {
+            highlightCircle.classList.add("circle-small");
+            console.log("Mulai swipe...");
+          },
+        },
+      });
+    </script>
