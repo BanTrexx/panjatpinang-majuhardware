@@ -94,6 +94,30 @@
     z-index: 3;
     transition: bottom 0.5s linear;
   }
+
+  .player1-bound {
+    /* background: #000; */
+    position: absolute;
+    left: 50%;
+    top: 25%;
+    transform: translateX(-50%);
+    min-width: 200px;
+    min-height: 200px;
+    z-index: -1;
+    transition: left 1s linear;
+  }
+
+  .player2-bound {
+    /* background: #000; */
+    position: absolute;
+    left: 50%;
+    top: 25%;
+    transform: translateX(-50%);
+    min-width: 200px;
+    min-height: 200px;
+    z-index: -1;
+    transition: left 1s linear;
+  }
 </style>
 
 <div class="scene">
@@ -104,6 +128,7 @@
   <div class="player player1">
     <div class="player-wrapper">
       <img class="player-tag" id="p1-tag" src="/assets/char/p1.png" />
+      <div class="player1-bound"></div>
       <video id="player1vid" autoplay muted playsinline></video>
     </div>
   </div>
@@ -112,6 +137,7 @@
   <div class="player player2">
     <div class="player-wrapper">
       <img class="player-tag" id="p2-tag" src="/assets/char/p2.png" />
+      <div class="player2-bound"></div>
       <video id="player2vid" autoplay muted playsinline></video>
     </div>
   </div>
@@ -135,6 +161,9 @@
   const socket = io({
     query: { role: "display", name: "display" },
   });
+
+  const player1bound = document.querySelector(".player1-bound");
+  const player2bound = document.querySelector(".player2-bound");
 
   let currentPlayers = [];
   let playersProgress = {
@@ -241,11 +270,20 @@
   const player2vid = document.getElementById("player2vid");
   const pinangVid = document.getElementById("pinangVid");
 
-  let currentObstacles = [];
   let currentCoins = [];
+  let currentPoops = [];
   let currentPlane = null;
   let currentBird = null;
   let currentPinangFinish = null;
+
+  triggerRandomEvent();
+
+  function gameLoop() {
+    checkCollision();
+    requestAnimationFrame(gameLoop);
+  }
+
+  requestAnimationFrame(gameLoop);
 
   // Helper untuk inisialisasi video
   function initVideo(el, src, { autoplay = true, muted = true, loop = false } = {}) {
@@ -295,6 +333,11 @@
         coin.remove();
       }
     });
+
+    if (Math.abs(currentOffset - lastEventOffset) >= eventInterval) {
+      lastEventOffset = currentOffset;
+      triggerRandomEvent();
+    }
 
     if (currentOffset <= maxOffset + height) {
       memanjat(character);
@@ -347,24 +390,6 @@
     pinangVid.currentTime = 0;
     pinangVid.loop = false;
     pinangVid.play();
-
-    currentObstacles.forEach((obstacle, i) => {
-      const currentBottom = parseInt(window.getComputedStyle(obstacle).bottom);
-      const newBottom = currentBottom - 100;
-      obstacle.style.bottom = `${newBottom}px`;
-
-      if (newBottom <= 0) {
-        obstacle.remove();
-        currentObstacles.splice(i, 1);
-      }
-    });
-
-    // Cek apakah offset saat ini melewati kelipatan 500
-    if (Math.abs(currentOffset - lastEventOffset) >= eventInterval) {
-      lastEventOffset = currentOffset;
-      triggerRandomEvent();
-    }
-    checkCollision();
   }
 
   function memanjat(character) {
@@ -390,7 +415,7 @@
     const climberBottom = parseInt(window.getComputedStyle(climberContainer).bottom);
     const newClimberBottom = climberBottom + 100;
 
-    if (newClimberBottom <= 600) {
+    if (newClimberBottom <= 400) {
       climberContainer.style.bottom = `${newClimberBottom}px`;
     }
 
@@ -407,21 +432,12 @@
 
   function checkCollision() {
     const players = [
-      { el: document.querySelector(".player1"), name: "p1" },
-      { el: document.querySelector(".player2"), name: "p2" },
+      { el: player1bound, name: "p1" },
+      { el: player2bound, name: "p2" },
     ];
 
     players.forEach(({ el, name }) => {
       const rect1 = el.getBoundingClientRect();
-
-      currentObstacles.forEach((obstacle, i) => {
-        const rect2 = obstacle.getBoundingClientRect();
-        if (isOverlap(rect1, rect2) && !isDodging[name]) {
-          console.log(`${name} terkena obstacle!`);
-          obstacle.remove();
-          currentObstacles.splice(i, 1);
-        }
-      });
 
       currentCoins.forEach((coin, i) => {
         const rect2 = coin.getBoundingClientRect();
@@ -432,7 +448,36 @@
           // Tambah skor di sini
         }
       });
+
+      currentPoops.forEach((poop, i) => {
+        const poopRect = getPoopCollider(poop); // pakai collider khusus
+
+        if (isOverlap(rect1, poopRect)) {
+          console.log(`${name} mengambil poop!`);
+          poop.remove();
+          currentPoops.splice(i, 1);
+          // Tambah skor di sini
+        }
+      });
     });
+  }
+
+  function getPoopCollider(poop) {
+    const rect = poop.getBoundingClientRect();
+
+    // Collider custom: 100x100px di tengah gambar
+    const colliderWidth = 100;
+    const colliderHeight = 100;
+
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    return {
+      left: centerX - colliderWidth / 2,
+      top: centerY - colliderHeight / 2,
+      right: centerX + colliderWidth / 2,
+      bottom: centerY + colliderHeight / 2,
+    };
   }
 
   function isOverlap(r1, r2) {
@@ -449,6 +494,7 @@
     const delayobstacle = Math.random() * 2000;
     setTimeout(() => {
       console.log("obstacle");
+      spawnBird();
       // spawnObstacle();
     }, delayobstacle);
 
@@ -464,29 +510,9 @@
       console.log("pesawat");
       spawnPlane();
     }, delaypesawat);
-
-    const delaybird = Math.random() * 3000;
-    setTimeout(() => spawnBird(), delaybird);
-  }
-
-  function spawnObstacle() {
-    const obstacle = document.createElement("img");
-    obstacle.src = "/assets/env/item/obstacle/IMG_1020.GIF";
-    obstacle.className = "obstacle";
-    obstacle.style.position = "absolute";
-    obstacle.style.bottom = `${Math.abs(currentOffset) + 200}px`;
-    obstacle.style.left = `${Math.random() * 80 + 10}%`;
-    obstacle.style.width = "350px";
-    obstacle.style.zIndex = 4;
-
-    document.querySelector(".scene").appendChild(obstacle);
-    currentObstacles.push(obstacle);
-    console.log(">>> Obstacle spawned at", obstacle.style.left, obstacle.style.bottom);
   }
 
   function spawnCoins() {
-    currentCoins = [];
-
     const positions = ["15%", "75%"]; // kiri dan kanan
 
     positions.forEach((pos) => {
@@ -533,28 +559,85 @@
     }
 
     const bird = document.createElement("img");
-    bird.src = "/assets/env/item/object-bg/manuk.GIF"; // Pastikan file ada
+    bird.src = "/assets/env/item/object-bg/manuk.GIF";
     bird.className = "bird";
     bird.style.position = "absolute";
-    bird.style.left = "-400px"; // Mulai dari luar kiri layar
-    bird.style.bottom = `${Math.abs(currentOffset) + 600}px`;
+    bird.style.left = "-1000px";
+    bird.style.bottom = `1200px`;
     bird.style.width = "700px";
     bird.style.zIndex = 4;
-    bird.style.transition = "left 4s linear";
+    bird.style.transition = "left 5s linear";
 
-    document.querySelector(".gradient-bg")?.appendChild(bird);
+    document.querySelector(".scene")?.appendChild(bird);
     currentBird = bird;
 
-    // Mulai gerakan setelah satu frame render
+    // Trigger movement
     setTimeout(() => {
-      bird.style.left = "110%"; // Terbang ke kanan
+      bird.style.left = "110%";
     }, 100);
 
-    // Hapus setelah animasi selesai
+    // Mulai pantau posisi burung
+    let poop1Spawned = false;
+    let poop2Spawned = false;
+
+    function trackBird() {
+      if (!currentBird) return;
+
+      const birdRect = bird.getBoundingClientRect();
+      const birdCenterX = birdRect.left + birdRect.width / 2;
+      const birdBottomY = birdRect.top + birdRect.height;
+
+      if (!poop1Spawned && birdRect.left > -300) {
+        poop1Spawned = true;
+        spawnPoop(birdCenterX, birdBottomY);
+      }
+
+      if (!poop2Spawned && birdRect.left > 270) {
+        poop2Spawned = true;
+        spawnPoop(birdCenterX, birdBottomY);
+      }
+
+      requestAnimationFrame(trackBird);
+    }
+
+    requestAnimationFrame(trackBird);
+
+    // Cleanup setelah animasi selesai
     setTimeout(() => {
       bird.remove();
       currentBird = null;
     }, 5000);
+  }
+
+  function spawnPoop(x, y) {
+    const poop = document.createElement("img");
+    poop.src = "/assets/env/item/obstacle/IMG_1020.GIF";
+    poop.className = "poop";
+    poop.style.position = "absolute";
+    poop.style.left = `${x}px`;
+    poop.style.top = `${y - 500}px`;
+    poop.style.width = "400px";
+    poop.style.zIndex = 3;
+    poop.style.transition = "top 5s linear";
+
+    document.querySelector(".scene")?.appendChild(poop);
+    currentPoops.push(poop);
+
+    // Custom collider (misal 100x100 px di tengah gambar)
+    poop._collider = {
+      offsetX: 150, // dari kiri gambar
+      offsetY: 200, // dari atas gambar
+      width: 100,
+      height: 100,
+    };
+
+    setTimeout(() => {
+      poop.style.top = "100%";
+    }, 10);
+
+    setTimeout(() => {
+      poop.remove();
+    }, 2000);
   }
 
   document.addEventListener("keydown", (e) => {
@@ -587,6 +670,8 @@
 
     const isP1 = character === "p1";
     const dodger = isP1 ? player1vid : player2vid;
+    const dodgerbound = isP1 ? player1bound : player2bound;
+    const leftoverlap = isP1 ? "-50%" : "150%";
     const dodgerContainer = isP1 ? document.querySelector(".player1") : document.querySelector(".player2");
 
     isDodging[character] = true;
@@ -597,6 +682,7 @@
     dodger.loop = false;
     dodger.currentTime = 0;
     dodger.play();
+    dodgerbound.style.left = leftoverlap;
 
     // 2. Setelah selesai, kembali ke frame pertama climb (idle)
     dodger.addEventListener(
@@ -606,15 +692,15 @@
         dodger.currentTime = 0;
         dodger.pause();
         isDodging[character] = false;
+        dodgerbound.style.left = "50%";
 
         // Reset cooldown setelah 5 detik
         setTimeout(() => {
           dodgeCooldown[character] = false;
-        }, 5000);
+        }, 2000);
       },
       { once: true }
     );
-    checkCollision();
   }
 
   function playFinishVideo(character) {
